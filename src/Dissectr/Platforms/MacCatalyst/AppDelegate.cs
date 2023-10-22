@@ -1,6 +1,6 @@
 using Foundation;
 
-namespace VideoCategorizer;
+namespace Dissectr;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate

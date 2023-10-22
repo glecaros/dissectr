@@ -1,4 +1,4 @@
-namespace VideoCategorizer;
+namespace Dissectr;
 
 public partial class AppShell : Shell
 {

@@ -6,16 +6,16 @@
         <!-- Uncomment to also build the tizen app. You will need to install tizen by following this: https://github.com/Samsung/Tizen.NET -->
         <!-- <TargetFrameworks>$(TargetFrameworks);net7.0-tizen</TargetFrameworks> -->
         <OutputType>Exe</OutputType>
-        <RootNamespace>VideoCategorizer</RootNamespace>
+        <RootNamespace>Dissectr</RootNamespace>
         <UseMaui>true</UseMaui>
         <SingleProject>true</SingleProject>
         <ImplicitUsings>enable</ImplicitUsings>
 
         <!-- Display name -->
-        <ApplicationTitle>VideoCategorizer</ApplicationTitle>
+        <ApplicationTitle>Dissectr</ApplicationTitle>
 
         <!-- App Identifier -->
-        <ApplicationId>com.companyname.videocategorizer</ApplicationId>
+        <ApplicationId>com.companyname.dissectr</ApplicationId>
         <ApplicationIdGuid>d4eceee9-afdb-4e5c-ba92-8175650c402d</ApplicationIdGuid>
 
         <!-- Versions -->
@@ -49,8 +49,33 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="LibVLCSharp" Version="3.8.0" />
+        <PackageReference Include="CommunityToolkit.Maui.MediaElement" Version="2.0.0" />
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
         <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Update="MediaControls.xaml.cs">
+        <DependentUpon>MediaControls.xaml</DependentUpon>
+      </Compile>
+      <Compile Update="Properties\Resources.Designer.cs">
+        <DesignTime>True</DesignTime>
+        <AutoGen>True</AutoGen>
+        <DependentUpon>Resources.resx</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <MauiXaml Update="MediaControls.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </MauiXaml>
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Update="Properties\Resources.resx">
+        <Generator>ResXFileCodeGenerator</Generator>
+        <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      </EmbeddedResource>
     </ItemGroup>
 
 </Project>

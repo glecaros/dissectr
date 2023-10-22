@@ -1,7 +1,7 @@
 using ObjCRuntime;
 using UIKit;
 
-namespace VideoCategorizer;
+namespace Dissectr;
 
 public class Program
 {

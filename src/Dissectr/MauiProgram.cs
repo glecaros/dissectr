@@ -1,6 +1,7 @@
+using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 
-namespace VideoCategorizer;
+namespace Dissectr;
 
 public static class MauiProgram
 {
@@ -9,10 +10,12 @@ public static class MauiProgram
         var builder = MauiApp.CreateBuilder();
         builder
             .UseMauiApp<App>()
+            .UseMauiCommunityToolkitMediaElement()
             .ConfigureFonts(fonts =>
             {
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
+                fonts.AddFont("Font Awesome 6 Free-Solid-900.otf", "FontAwesomeFree");
             });
 
 #if DEBUG
