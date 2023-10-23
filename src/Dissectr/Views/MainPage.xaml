@@ -4,11 +4,15 @@
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:local="clr-namespace:Dissectr"
              xmlns:views="clr-namespace:Dissectr.Views"
+             xmlns:viewModels="clr-namespace:Dissectr.ViewModels"
              x:Class="Dissectr.Views.MainPage"
              Appearing="OnAppearing"
              Disappearing="OnDisappearing"
              Unloaded="OnUnloaded"
              BackgroundColor="White">
+    <!--<ContentPage.BindingContext>-->
+        <!--<viewModels:MainViewModel />
+    </ContentPage.BindingContext>-->
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*" />
@@ -24,14 +28,13 @@
             Grid.RowSpan="3"
             Source="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
             x:Name="mediaElement"
-
-              ShouldShowPlaybackControls="True" />
+            MediaOpened="MediaOpened"
+            ShouldShowPlaybackControls="True" />
         <views:MediaControls
             Grid.Row="0"
             Grid.Column="1"
-
-            Duration="{Binding Duration}"
-            Position="{Binding Position}"/>
+            Duration="{Binding Source={x:Reference mediaElement}, Path=Duration}"
+            Position="{Binding Source={x:Reference mediaElement}, Path=Position}"/>
         <Editor
             Grid.Row="3"
             Grid.Column="0"
