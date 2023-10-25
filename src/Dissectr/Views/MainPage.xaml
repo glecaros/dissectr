@@ -9,10 +9,11 @@
              Appearing="OnAppearing"
              Disappearing="OnDisappearing"
              Unloaded="OnUnloaded"
+             BindingContextChanged="OnBindingContextChanged"
              BackgroundColor="White">
-    <!--<ContentPage.BindingContext>-->
-        <!--<viewModels:MainViewModel />
-    </ContentPage.BindingContext>-->
+    <ContentPage.BindingContext>
+        <viewModels:MainViewModel />
+    </ContentPage.BindingContext>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*" />
@@ -26,7 +27,6 @@
         </Grid.RowDefinitions>
         <toolkit:MediaElement
             Grid.RowSpan="3"
-            Source="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
             x:Name="mediaElement"
             MediaOpened="MediaOpened"
             ShouldShowPlaybackControls="True" />
@@ -34,7 +34,10 @@
             Grid.Row="0"
             Grid.Column="1"
             Duration="{Binding Source={x:Reference mediaElement}, Path=Duration}"
-            Position="{Binding Source={x:Reference mediaElement}, Path=Position}"/>
+            Position="{Binding Source={x:Reference mediaElement}, Path=Position}"
+            Play="{Binding OnPlay}"
+            Pause="{Binding OnPause}"
+            Seek="{Binding OnSeek}"/>
         <Editor
             Grid.Row="3"
             Grid.Column="0"

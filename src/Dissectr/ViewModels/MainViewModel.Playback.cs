@@ -1,28 +1,36 @@
+using System.Windows.Input;
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using System.Windows.Input;
+
+using Dissectr.Util;
 
 namespace Dissectr.ViewModels;
 
-internal partial class MainViewModel: ObservableObject
+internal partial class MainViewModel: ObservableObject, IMediaControl
 {
     public TimeSpan Position { get; set; }
     public TimeSpan Duration { get; set; }
 
     public bool IsPlaying { get; set; }
 
-    public ICommand Play { get; }
-    public ICommand Pause { get; }
-    public ICommand Stop { get; }
-    public ICommand Seek { get; }
+    public ICommand OnPlay { get; }
+    public ICommand OnPause { get; }
+    public ICommand OnStop{ get; }
+    public ICommand OnSeek { get; }
 
     public MainViewModel()
     {
-        Play = new AsyncRelayCommand(PlayHandler);
-        Pause = new AsyncRelayCommand(PauseHandler);
-        Stop = new AsyncRelayCommand(StopHandler);
-        Seek = new AsyncRelayCommand<TimeSpan>(SeekHandler);
+        OnPlay = new RelayCommand(PlayHandler);
+        OnPause = new RelayCommand(PauseHandler);
+        OnSeek = new RelayCommand<TimeSpan>(SeekHandler);
     }
+
+    #region IMediaControl
+    public event Action Play;
+    public event Action Pause;
+    public event Action<TimeSpan> Seek;
+    #endregion
 
     private void RefreshProperties()
     {
@@ -31,30 +39,29 @@ internal partial class MainViewModel: ObservableObject
         OnPropertyChanged(nameof(IsPlaying));
     }
 
-    private async Task PlayHandler()
+    private void PlayHandler()
     {
         if (!IsPlaying)
         {
-
+            Play.Invoke();
         }
+        IsPlaying = true;
     }
 
-    private async Task PauseHandler()
+    private void PauseHandler()
     {
         if (IsPlaying)
         {
-
+            Pause.Invoke();
         }
+        IsPlaying = false;
 
     }
 
-    private async Task StopHandler()
+    private void SeekHandler(TimeSpan position)
     {
-
-
+        Seek.Invoke(position);
     }
-
-    private async Task SeekHandler(TimeSpan position) { }
 
 
 }

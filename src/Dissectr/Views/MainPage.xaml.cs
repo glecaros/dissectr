@@ -1,5 +1,8 @@
-using CommunityToolkit.Maui.Views;
 using System.ComponentModel;
+
+using CommunityToolkit.Maui.Views;
+
+using Dissectr.Util;
 
 namespace Dissectr.Views;
 
@@ -27,6 +30,21 @@ public partial class MainPage : ContentPage
 
     private void MediaOpened(object sender, EventArgs e)
     {
+    }
+
+    private void OnPlay() => mediaElement?.Play();
+    private void OnPause() => mediaElement?.Pause();
+    private void OnSeek(TimeSpan position) => mediaElement?.SeekTo(position);
+
+    private void OnBindingContextChanged(object sender, EventArgs e)
+    {
+        if (BindingContext is IMediaControl mediaControl)
+        {
+            mediaControl.Play += OnPlay;
+            mediaControl.Pause += OnPause;
+            mediaControl.Seek += OnSeek;
+        }
+
     }
 }
 

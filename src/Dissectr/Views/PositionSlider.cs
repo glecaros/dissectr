@@ -7,7 +7,7 @@ public class PositionSlider : Slider
         {
             double seconds = ((TimeSpan)newValue).TotalSeconds;
             var slider = bindable as Slider;
-            slider.IsEnabled = seconds == 0;
+            slider.IsEnabled = seconds != 0;
             slider.Maximum = seconds;
         });
 
