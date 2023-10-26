@@ -3,9 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:views="clr-namespace:Dissectr.Views"
              xmlns:viewModels="clr-namespace:Dissectr.ViewModels"
+             xmlns:converters="clr-namespace:Dissectr.Converters"
              x:Class="Dissectr.Views.MediaControls"
              x:Name="this"
              BackgroundColor="LightGray">
+    <ContentView.Resources>
+        <converters:MediaElementStateToPlaying x:Key="mediaElementStateToPlaying"/>
+    </ContentView.Resources>
     <VerticalStackLayout Padding="10" BindingContext="{x:Reference this}">
         <Label
             HorizontalOptions="Center"
@@ -20,7 +24,9 @@
             DragCompleted="dragCompleted"/>
         <Label
             HorizontalOptions="Center"
-            TextColor="Black" Text="[0:00:10 - 0:00:20]" />
+            TextColor="Black"
+            Text="{Binding PlaybackState}"
+        />
         <HorizontalStackLayout HorizontalOptions="Center" HeightRequest="100">
             <Button
                 x:Name="zoomButton"
@@ -40,8 +46,18 @@
             <Button
                 x:Name="togglePlayButton"
                 Clicked="togglePlayButtonClicked"
-                FontFamily="FontAwesomeFree"
-                Text="&#xf04b;"/>
+                Text="&#xf04b;"
+                FontFamily="FontAwesomeFree">
+                <Button.Triggers>
+                    <DataTrigger
+                        TargetType="Button"
+                        Binding="{Binding PlaybackState, Converter={x:StaticResource mediaElementStateToPlaying}}"
+                        Value="True">
+                        <Setter Property="Text" Value="&#xf04c;"/>
+                    </DataTrigger>
+                </Button.Triggers>
+            </Button>
+                
             <Button
                 x:Name="stopButton"
                 Clicked="stopButtonClicked"

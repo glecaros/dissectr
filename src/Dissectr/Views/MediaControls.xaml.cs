@@ -1,3 +1,4 @@
+using CommunityToolkit.Maui.Core.Primitives;
 using System.Windows.Input;
 
 namespace Dissectr.Views;
@@ -30,16 +31,16 @@ public partial class MediaControls : ContentView
     }
     #endregion
 
-    #region IsPlaying Property
-    public static readonly BindableProperty IsPlayingProperty = BindableProperty.Create(
-        nameof(IsPlaying),
-        typeof(bool),
+    #region PlaybackState Property
+    public static readonly BindableProperty PlaybackStateProperty = BindableProperty.Create(
+        nameof(PlaybackState),
+        typeof(MediaElementState),
         typeof(MediaControls));
 
-    public bool IsPlaying
+    public MediaElementState PlaybackState
     {
-        get => (bool)GetValue(IsPlayingProperty);
-        set => SetValue(IsPlayingProperty, value);
+        get => (MediaElementState)GetValue(PlaybackStateProperty);
+        set => SetValue(PlaybackStateProperty, value);
     }
     #endregion
 
@@ -103,6 +104,7 @@ public partial class MediaControls : ContentView
 
     }
 
+    public bool IsPlaying { get => PlaybackState == MediaElementState.Playing; }
     private bool wasPlaying = false;
 
     private void dragStarted(object sender, EventArgs e)

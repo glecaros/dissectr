@@ -1,5 +1,5 @@
 using System.Windows.Input;
-
+using CommunityToolkit.Maui.Core.Primitives;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -9,10 +9,26 @@ namespace Dissectr.ViewModels;
 
 internal partial class MainViewModel: ObservableObject, IMediaControl
 {
-    public TimeSpan Position { get; set; }
-    public TimeSpan Duration { get; set; }
+    private TimeSpan position;
+    public TimeSpan Position
+    {
+        get => position;
+        set => SetProperty(ref position, value);
+    }
 
-    public bool IsPlaying { get; set; }
+    private TimeSpan duration;
+    public TimeSpan Duration
+    {
+        get => duration;
+        set => SetProperty(ref duration, value);
+    }
+
+    private MediaElementState playbackState;
+    public MediaElementState PlaybackState
+    {
+        get => playbackState;
+        set => SetProperty(ref playbackState, value);
+    }
 
     public ICommand OnPlay { get; }
     public ICommand OnPause { get; }
@@ -36,26 +52,23 @@ internal partial class MainViewModel: ObservableObject, IMediaControl
     {
         OnPropertyChanged(nameof(Position));
         OnPropertyChanged(nameof(Duration));
-        OnPropertyChanged(nameof(IsPlaying));
+        OnPropertyChanged(nameof(PlaybackState));
     }
 
     private void PlayHandler()
     {
-        if (!IsPlaying)
+        if (PlaybackState is not MediaElementState.Playing)
         {
             Play.Invoke();
         }
-        IsPlaying = true;
     }
 
     private void PauseHandler()
     {
-        if (IsPlaying)
+        if (PlaybackState is MediaElementState.Playing)
         {
             Pause.Invoke();
         }
-        IsPlaying = false;
-
     }
 
     private void SeekHandler(TimeSpan position)
