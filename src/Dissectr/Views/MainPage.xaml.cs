@@ -18,7 +18,7 @@ public partial class MainPage : ContentPage
         base.OnAppearing();
     }
 
-    void OnDisappearing(object sender, System.EventArgs e)
+    void OnDisappearing(object sender, EventArgs e)
     {
         base.OnDisappearing();
     }
@@ -36,15 +36,22 @@ public partial class MainPage : ContentPage
     private void OnPause() => mediaElement?.Pause();
     private void OnSeek(TimeSpan position) => mediaElement?.SeekTo(position);
 
+    private IMediaControl? currentMediaControl;
     private void OnBindingContextChanged(object sender, EventArgs e)
     {
+        if (currentMediaControl is not null)
+        {
+            currentMediaControl.Play -= OnPlay;
+            currentMediaControl.Pause -= OnPause;
+            currentMediaControl.Seek -= OnSeek;
+        }
         if (BindingContext is IMediaControl mediaControl)
         {
             mediaControl.Play += OnPlay;
             mediaControl.Pause += OnPause;
             mediaControl.Seek += OnSeek;
         }
-
+        currentMediaControl = BindingContext as IMediaControl;
     }
 }
 

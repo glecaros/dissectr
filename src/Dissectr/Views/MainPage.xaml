@@ -14,6 +14,14 @@
     <ContentPage.BindingContext>
         <viewModels:MainViewModel />
     </ContentPage.BindingContext>
+    <ContentPage.MenuBarItems>
+        <MenuBarItem Text="File">
+            <MenuFlyoutItem Text="Open Project"></MenuFlyoutItem>
+            <MenuFlyoutItem Text="Save Project"></MenuFlyoutItem>
+            <MenuFlyoutItem Text="Save Project As"></MenuFlyoutItem>
+            <MenuFlyoutItem Text="Exit"></MenuFlyoutItem>
+        </MenuBarItem>
+    </ContentPage.MenuBarItems>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="3*" />
@@ -29,7 +37,6 @@
             Grid.RowSpan="3"
             x:Name="mediaElement"
             MediaOpened="MediaOpened"
-            ShouldShowPlaybackControls="True"
             CurrentState="{Binding PlaybackState, Mode=OneWayToSource}" />
         <views:MediaControls
             Grid.Row="0"

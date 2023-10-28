@@ -120,7 +120,7 @@ public partial class MediaControls : ContentView
 
     }
 
-    public bool IsPlaying { get => PlaybackState == MediaElementState.Playing; }
+    public bool IsPlaying => PlaybackState == MediaElementState.Playing;
     private bool wasPlaying = false;
     private bool isPositionBound = false;
 
