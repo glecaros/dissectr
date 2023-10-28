@@ -22,7 +22,16 @@ public partial class MediaControls : ContentView
     public static readonly BindableProperty PositionProperty = BindableProperty.Create(
         nameof(Position),
         typeof(TimeSpan),
-        typeof(MediaControls));
+        typeof(MediaControls),
+        propertyChanged: OnPositionChanged);
+
+    static void OnPositionChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        if (bindable is MediaControls mediaControls)
+        {
+            mediaControls.AttachPosition();
+        }
+    }
 
     public TimeSpan Position
     {
@@ -46,7 +55,7 @@ public partial class MediaControls : ContentView
 
     #region Play Property
     public static readonly BindableProperty PlayProperty = BindableProperty.Create(nameof(Play), typeof(ICommand), typeof(MediaControls));
-    
+
     public ICommand Play
     {
         get => (ICommand)GetValue(PlayProperty);
@@ -66,7 +75,7 @@ public partial class MediaControls : ContentView
 
     #region Seek Property
     public static readonly BindableProperty SeekProperty = BindableProperty.Create(nameof(Seek), typeof(ICommand), typeof(MediaControls));
-    
+
     public ICommand Seek
     {
         get => (ICommand)GetValue(SeekProperty);
@@ -94,9 +103,16 @@ public partial class MediaControls : ContentView
 
     }
 
-    private void togglePlayButtonClicked(object sender, EventArgs e)
+    private void togglePlayClicked(object sender, EventArgs e)
     {
-
+        if (IsPlaying)
+        {
+            Pause?.Execute(null);
+        }
+        else
+        {
+            Play?.Execute(null);
+        }
     }
 
     private void stopButtonClicked(object sender, EventArgs e)
@@ -106,10 +122,27 @@ public partial class MediaControls : ContentView
 
     public bool IsPlaying { get => PlaybackState == MediaElementState.Playing; }
     private bool wasPlaying = false;
+    private bool isPositionBound = false;
+
+    private void AttachPosition()
+    {
+        if (!isPositionBound)
+        {
+            slider.SetBinding(PositionSlider.PositionProperty, new Binding("Position"));
+        }
+    }
+
+    private void DetachPosition()
+    {
+        if (isPositionBound)
+        {
+            slider.RemoveBinding(PositionProperty);
+        }
+    }
 
     private void dragStarted(object sender, EventArgs e)
     {
-        slider.RemoveBinding(PositionProperty);
+        DetachPosition();
         wasPlaying = IsPlaying;
         if (wasPlaying)
         {
@@ -125,7 +158,5 @@ public partial class MediaControls : ContentView
         {
             Play?.Execute(null);
         }
-        slider.SetBinding(PositionSlider.PositionProperty, new Binding("Position"));
-
     }
 }

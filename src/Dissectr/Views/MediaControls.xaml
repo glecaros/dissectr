@@ -45,7 +45,7 @@
                 Text="&#xf048;"/>
             <Button
                 x:Name="togglePlayButton"
-                Clicked="togglePlayButtonClicked"
+                Clicked="togglePlayClicked"
                 Text="&#xf04b;"
                 FontFamily="FontAwesomeFree">
                 <Button.Triggers>
@@ -57,7 +57,6 @@
                     </DataTrigger>
                 </Button.Triggers>
             </Button>
-                
             <Button
                 x:Name="stopButton"
                 Clicked="stopButtonClicked"
