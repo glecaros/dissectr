@@ -16,6 +16,8 @@ public partial class MainPage : ContentPage
     void OnAppearing(object sender, EventArgs e)
     {
         base.OnAppearing();
+        var source = MediaSource.FromFile(@"C:\Users\gelecaro\OneDrive\Trabajo Sandra\Cristian.and.Caren_7°C_ClaseN°3y4_11.10.22.mp4");
+        mediaElement.Source = source;
     }
 
     void OnDisappearing(object sender, EventArgs e)
