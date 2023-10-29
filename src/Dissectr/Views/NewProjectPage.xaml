@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:viewModels="clr-namespace:Dissectr.ViewModels"
+             x:Class="Dissectr.Views.NewProjectPage"
+             Title="NewProject">
+    <ContentPage.BindingContext>
+        <viewModels:NewProjectViewModel />
+    </ContentPage.BindingContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="3*" />
+        </Grid.ColumnDefinitions>
+        <Label
+            Grid.Row="0"
+            Grid.Column="0"
+            Text="Name"
+            VerticalOptions="Center"
+            HorizontalOptions="Center" />
+        <Entry
+            Grid.Row="0"
+            Grid.Column="1"
+            Placeholder="Project Name"
+            Text="{Binding ProjectName}" />
+        <Label
+            Grid.Row="1"
+            Grid.Column="0"
+            Text="Interval Length:" />
+        <HorizontalStackLayout
+            Grid.Row="1"
+            Grid.Column="1"
+            Spacing="10">
+            <Label Text="{Binding Path=IntervalLength, StringFormat='{0:hh\\:mm\\:ss}'}" />
+            <Stepper
+                Minimum="5"
+                Maximum="60"
+                Value="10"
+                Increment="5">
+                <Stepper.Behaviors>
+                    <toolkit:EventToCommandBehavior
+                        x:TypeArguments="ValueChangedEventArgs"
+                        EventName="ValueChanged"
+                        Command="{Binding IntervalLengthChanged}" />
+                </Stepper.Behaviors>
+            </Stepper>
+        </HorizontalStackLayout>
+    </Grid>
+</ContentPage>

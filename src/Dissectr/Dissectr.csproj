@@ -63,6 +63,9 @@
         <AutoGen>True</AutoGen>
         <DependentUpon>Resources.resx</DependentUpon>
       </Compile>
+      <Compile Update="Views\NewProjectPage.xaml.cs">
+        <DependentUpon>NewProjectPage.xaml</DependentUpon>
+      </Compile>
       <Compile Update="Views\StartPage.xaml.cs">
         <DependentUpon>StartPage.xaml</DependentUpon>
       </Compile>
@@ -80,6 +83,9 @@
 
     <ItemGroup>
       <MauiXaml Update="Views\MediaControls.xaml">
+        <Generator>MSBuild:Compile</Generator>
+      </MauiXaml>
+      <MauiXaml Update="Views\NewProjectPage.xaml">
         <Generator>MSBuild:Compile</Generator>
       </MauiXaml>
       <MauiXaml Update="Views\StartPage.xaml">

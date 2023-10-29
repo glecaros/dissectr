@@ -24,16 +24,16 @@ public class ProjectViewModel: ObservableObject
 
     private async Task AddVideoFileHandler()
     {
-        var result = await FilePicker.PickAsync(new PickOptions
-        {
-            PickerTitle = "Select a video file",
-            FileTypes = FilePickerFileType.,
-        });
+        //var result = await FilePicker.PickAsync(new PickOptions
+        //{
+        //    PickerTitle = "Select a video file",
+        //    FileTypes = FilePickerFileType.,
+        //});
 
-        if (result is FileResult fileResult)
-        {
+        //if (result is FileResult fileResult)
+        //{
 
-            Files.Add(fileResult.FullPath);
-        }
+        //    Files.Add(fileResult.FullPath);
+        //}
     }
 }

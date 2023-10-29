@@ -5,7 +5,7 @@
              xmlns:viewModels="clr-namespace:Dissectr.ViewModels"
              Title="Home">
     <ContentPage.BindingContext>
-        <viewModels:Home />
+        <viewModels:ProjectViewModel />
     </ContentPage.BindingContext>
     <VerticalStackLayout Padding="10">
         <Label

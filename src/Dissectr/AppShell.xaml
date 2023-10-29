@@ -10,6 +10,11 @@
     <ShellContent
         Title="Dissectr"
         ContentTemplate="{DataTemplate views:StartPage}"
-        Route="Home" />
+        Route="start" />
+
+    <ShellContent
+        Title="Dissectr"
+        ContentTemplate="{DataTemplate views:NewProjectPage}"
+        Route="new-project" />
 
 </Shell>
