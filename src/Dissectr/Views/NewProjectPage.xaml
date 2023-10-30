@@ -10,7 +10,8 @@
     </ContentPage.BindingContext>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="50" />
+            <RowDefinition Height="50" />
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -22,21 +23,28 @@
             Grid.Column="0"
             Text="Name"
             VerticalOptions="Center"
-            HorizontalOptions="Center" />
+            HorizontalOptions="End" />
         <Entry
             Grid.Row="0"
             Grid.Column="1"
+            Margin="10,0,0,0"
             Placeholder="Project Name"
+            VerticalOptions="Center"
             Text="{Binding ProjectName}" />
         <Label
             Grid.Row="1"
             Grid.Column="0"
-            Text="Interval Length:" />
+            Text="Interval Length:"
+            VerticalOptions="Center"
+            HorizontalOptions="End"/>
         <HorizontalStackLayout
             Grid.Row="1"
             Grid.Column="1"
+            Margin="10,0,0,0"
             Spacing="10">
-            <Label Text="{Binding Path=IntervalLength, StringFormat='{0:hh\\:mm\\:ss}'}" />
+            <Label
+                VerticalOptions="Center"
+                Text="{Binding Path=IntervalLength, StringFormat='{0:hh\\:mm\\:ss}'}" />
             <Stepper
                 Minimum="5"
                 Maximum="60"
@@ -50,5 +58,51 @@
                 </Stepper.Behaviors>
             </Stepper>
         </HorizontalStackLayout>
+        <CollectionView
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Grid.Row="2"
+            ItemsSource="{Binding Dimensions}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Frame
+                        CornerRadius="5"
+                        Margin="10">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="3*" />
+                            </Grid.ColumnDefinitions>
+                            <Label
+                                Grid.Column="0"
+                                Grid.Row="0"
+                                HorizontalOptions="End"
+                                VerticalOptions="Center"
+                                Text="Name" />
+                            <Entry
+                                Grid.Column="1"
+                                Grid.Row="0"
+                                Margin="10,0,0,0"
+                                Text="{Binding Name}" />
+                            <Label
+                                Grid.Column="0"
+                                Grid.Row="1"
+                                HorizontalOptions="End"
+                                VerticalOptions="Center"
+                                Text="Optional" />
+                            <CheckBox
+                                Grid.Column="1"
+                                Grid.Row="1"
+                                Margin="10,0,0,0"
+                                IsChecked="{Binding Optional}" />
+                        </Grid>
+                    </Frame>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
     </Grid>
 </ContentPage>

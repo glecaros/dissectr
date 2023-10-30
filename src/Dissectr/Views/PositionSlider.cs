@@ -6,17 +6,21 @@ public class PositionSlider : Slider
         propertyChanged: (bindable, oldValue, newValue) =>
         {
             double seconds = ((TimeSpan)newValue).TotalSeconds;
-            var slider = bindable as Slider;
-            slider.IsEnabled = seconds != 0;
-            slider.Maximum = seconds;
+            if (bindable is Slider slider)
+            {
+                slider.IsEnabled = seconds != 0;
+                slider.Maximum = seconds;
+            }
         });
 
     public static readonly BindableProperty PositionProperty = BindableProperty.Create(nameof(Position), typeof(TimeSpan), typeof(PositionSlider), new TimeSpan(0),
         propertyChanged: (bindable, oldValue, newValue) =>
         {
             double seconds = ((TimeSpan)newValue).TotalSeconds;
-            var slider = bindable as Slider;
-            slider.Value = seconds;
+            if (bindable is Slider slider)
+            {
+                slider.Value = seconds;
+            }
         });
 
     public TimeSpan Duration
