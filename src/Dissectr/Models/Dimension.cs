@@ -1,8 +1,17 @@
-﻿namespace Dissectr.Models;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.ObjectModel;
 
-public class Dimension
+namespace Dissectr.Models;
+
+public partial class Dimension: ObservableObject
 {
-    public required string Name { get; set; }
-    public bool Optional { get; set; }
-    public required List<DimensionOption> DimensionOptions { get; set; }
+    [ObservableProperty]
+    private string name = string.Empty;
+
+    [ObservableProperty]
+    private bool optional = false;
+
+    [ObservableProperty]
+    private ObservableCollection<DimensionOption> dimensionOptions = new();
+
 }

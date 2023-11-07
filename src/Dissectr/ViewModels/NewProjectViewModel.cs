@@ -6,29 +6,21 @@ using System.Windows.Input;
 
 namespace Dissectr.ViewModels;
 
-public class NewProjectViewModel: ObservableObject
+public partial class NewProjectViewModel: ObservableObject
 {
-    public ICommand IntervalLengthChanged { get; }
-
+    [ObservableProperty]
     private string name = string.Empty;
-    public string Name
-    {
-        get => name;
-        set => SetProperty(ref name, value);
-    }
 
+    [ObservableProperty]
     private TimeSpan intervalLength = TimeSpan.FromSeconds(10);
-    public TimeSpan IntervalLength
-    {
-        get => intervalLength;
-        set => SetProperty(ref intervalLength, value);
-    }
 
-    public ObservableCollection<Dimension> Dimensions { get; }
+    [ObservableProperty]
+    public ObservableCollection<Dimension> dimensions;
 
     public NewProjectViewModel()
     {
-        IntervalLengthChanged = new RelayCommand<ValueChangedEventArgs>(IntervalLengthChangedHandler);
+        //IntervalLengthChanged = new RelayCommand<ValueChangedEventArgs>(IntervalLengthChangedHandler);
+     //   AddDimensionOptionCommand = new RelayCommand<Dimension>(AddDimensionOptionHandler);
         Dimensions = new ObservableCollection<Dimension>
         {
             new()
@@ -61,8 +53,58 @@ public class NewProjectViewModel: ObservableObject
             },
         };
     }
-    private void IntervalLengthChangedHandler(ValueChangedEventArgs args)
+
+    [RelayCommand]
+    private void Browse()
+    {
+        throw new NotImplementedException();
+    }
+
+    [RelayCommand]
+    private void IntervalLengthChanged(ValueChangedEventArgs args)
     {
         IntervalLength = TimeSpan.FromSeconds(args.NewValue);
+    }
+
+    [RelayCommand]
+    private void AddDimension()
+    {
+        Dimensions.Add(new Dimension());
+    }
+
+    [RelayCommand]
+    private void RemoveDimension(Dimension? dimension)
+    {
+        if (dimension is null)
+        {
+            return;
+        }
+        Dimensions.Remove(dimension);
+    }
+
+    [RelayCommand]
+    private void AddDimensionOption(Dimension? dimension)
+    {
+        if (dimension is null)
+        {
+            return;
+        }
+        var maxCode = dimension.DimensionOptions.Select(d => d.Code).Max();
+        dimension.DimensionOptions.Add(new DimensionOption(maxCode + 1, "New option"));
+    }
+
+    [RelayCommand]
+    private void RemoveDimensionOption(DimensionOption? dimensionOption)
+    {
+        if (dimensionOption is null)
+        {
+            return;
+        }
+        var dimension = Dimensions.FirstOrDefault(d => d.DimensionOptions.Contains(dimensionOption));
+        if (dimension is null)
+        {
+            return;
+        }
+        dimension.DimensionOptions.Remove(dimensionOption);
     }
 }
