@@ -33,7 +33,7 @@
             Margin="10,0,0,0"
             Placeholder="Project Name"
             VerticalOptions="Center"
-            Text="{Binding ProjectName}" />
+            Text="{Binding Name}" />
         <Label
             Grid.Row="1"
             Grid.Column="0"
@@ -91,7 +91,7 @@
                 Margin="10,0,0,0"
                 VerticalOptions="Center"
                 IsEnabled="False"
-                Text="{Binding FileName}" />
+                Text="{Binding FilePath}" />
         </Grid>
         <Label
             Grid.Row="3"
@@ -99,14 +99,24 @@
             Text="Dimensions"
             VerticalOptions="Center"
             HorizontalOptions="End" />
-        <Button
+        <HorizontalStackLayout
             Grid.Row="3"
             Grid.Column="1"
-            Text="Add Dimension"
-            Margin="10,0,0,0"
-            VerticalOptions="Center"
-            HorizontalOptions="Start"
-            Command="{Binding AddDimensionCommand}" />
+            HorizontalOptions="Start" >
+            <Button
+                Text="Add Dimension"
+                Margin="10,0,0,0"
+                VerticalOptions="Center"
+                Command="{Binding AddDimensionCommand}" />
+            <Button
+                Grid.Row="3"
+                Grid.Column="1"
+                Text="Import"
+                Margin="10,0,0,0"
+                VerticalOptions="Center"
+                HorizontalOptions="Start"
+                Command="{Binding ImportDimensionsCommand}" />
+        </HorizontalStackLayout>
         <CollectionView
             Grid.Column="0"
             Grid.ColumnSpan="2"
@@ -236,6 +246,7 @@
                 Text="Save"
                 HorizontalOptions="Center"
                 VerticalOptions="Center"
+                IsEnabled="{Binding IsValid}"
                 Command="{Binding SaveCommand}" />
         </AbsoluteLayout>
     </Grid>

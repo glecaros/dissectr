@@ -6,6 +6,12 @@ namespace Dissectr.Models;
 public partial class Dimension: ObservableObject
 {
     [ObservableProperty]
+    private Guid id = default;
+
+    [ObservableProperty]
+    private int order = default;
+
+    [ObservableProperty]
     private string name = string.Empty;
 
     [ObservableProperty]

@@ -1,3 +1,3 @@
 ﻿namespace Dissectr.Models;
 
-public record DimensionOption(int Code, string Name);
+public record DimensionOption(Guid Id, int Code, string Name);
