@@ -1,18 +1,26 @@
-﻿using SQLite;
+﻿using Microsoft.Data.Sqlite;
 
 namespace Dissectr.Models;
 
-class ScopeGuard<T>: IDisposable
+internal class ScopeGuard : IAsyncDisposable
 {
-    private Action<T> action;
-    private T value;
+    private Func<Task> _action;
+
+    internal ScopeGuard(Func<Task> action)
+    {
+        _action = action;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _action().ConfigureAwait(false);
+    }
 }
 
 class Project
 {
     private struct ProjectRecord
     {
-        [PrimaryKey]
         public int Id { get; set; }
 
         public string Name { get; set; }
@@ -24,7 +32,6 @@ class Project
 
     private struct DimensionRecord
     {
-        [PrimaryKey]
         public Guid Id { get; set; }
 
         public int Order { get; set; }
@@ -36,10 +43,8 @@ class Project
 
     private struct DimensionOptionRecord
     {
-        [PrimaryKey]
         public Guid Id { get; set; }
 
-        [Indexed]
         public Guid DimensionId { get; set; }
 
         public int Code { get; set; }
@@ -95,49 +100,70 @@ class Project
 
     public static async Task<string> CreateAsync(string path, Project project)
     {
-        var fullProjectPath = Path.ChangeExtension(Path.Combine(path, project.Name), ".dissectr");
-        SQLiteAsyncConnection connection = new(fullProjectPath, SQLite.SQLiteOpenFlags.Create | SQLite.SQLiteOpenFlags.ReadWrite | SQLite.SQLiteOpenFlags.FullMutex);
-        await connection.CreateTableAsync<ProjectRecord>();
-        await connection.CreateTableAsync<DimensionRecord>();
-        await connection.CreateTableAsync<DimensionOptionRecord>();
-        await connection.InsertAsync(ToRecord(project));
-        int order = 0;
-        foreach (var dimension in project.Dimensions)
-        {
-            dimension.Order = ++order;
-            var dimensionRecord = ToRecord(dimension);
-            await connection.InsertAsync(dimensionRecord);
-            var optionRecords = dimension.DimensionOptions.Select(o => ToRecord(dimensionRecord.Id, o));
-            await connection.InsertAllAsync(optionRecords);
-        }
+        //var fullProjectPath = Path.ChangeExtension(Path.Combine(path, project.Name), ".dissectr");
+        //SQLiteAsyncConnection connection = new(fullProjectPath, SQLite.SQLiteOpenFlags.Create | SQLite.SQLiteOpenFlags.ReadWrite | SQLite.SQLiteOpenFlags.FullMutex);
+        //await using var _ = new ScopeGuard(connection.CloseAsync);
+        //await connection.CreateTableAsync<ProjectRecord>();
+        //await connection.CreateTableAsync<DimensionRecord>();
+        //await connection.CreateTableAsync<DimensionOptionRecord>();
+        //await connection.InsertAsync(ToRecord(project));
+        //int order = 0;
+        //foreach (var dimension in project.Dimensions)
+        //{
+        //    dimension.Order = ++order;
+        //    var dimensionRecord = ToRecord(dimension);
+        //    await connection.InsertAsync(dimensionRecord);
+        //    var optionRecords = dimension.DimensionOptions.Select(o => ToRecord(dimensionRecord.Id, o));
+        //    await connection.InsertAllAsync(optionRecords);
+        //}
 
-        return fullProjectPath;
+        //return fullProjectPath;
+        return "lala";
     }
 
     public static async Task<Project> LoadAsync(string path)
     {
-        SQLiteAsyncConnection connection = new(path, SQLite.SQLiteOpenFlags.Create | SQLite.SQLiteOpenFlags.ReadWrite | SQLite.SQLiteOpenFlags.FullMutex);
-        var projectRecords= await connection.Table<ProjectRecord>().Take(1).ToListAsync();
-        var projectRecord = projectRecords.First();
-
-        Project project = new(projectRecord.Name, projectRecord.VideoFile, projectRecord.Interval, new());
-
-        var dimensionRecords = await connection.Table<DimensionRecord>()
-                                               .ToListAsync();
-        foreach (var dimensionRecord in dimensionRecords)
+        var connectionString = new SqliteConnectionStringBuilder()
         {
-            var optionRecords = await connection.Table<DimensionOptionRecord>()
-                                                .Where(o => o.DimensionId == dimensionRecord.Id)
-                                                .ToListAsync();
-            Dimension dimension = new()
-            {
-                Id = dimensionRecord.Id,
-                Name = dimensionRecord.Name,
-                Order = dimensionRecord.Order,
-                Optional = dimensionRecord.Optional,
-                DimensionOptions = new(optionRecords.Select(r => new DimensionOption(r.Id, r.Code, r.Name))),
-            };
+            DataSource = path,
+            Mode = SqliteOpenMode.ReadWriteCreate,
+        }.ToString();
+        using var connection = new SqliteConnection(connectionString);
+        await connection.OpenAsync();
+        var command = connection.CreateCommand();
+        command.CommandText = "SELECT Name, VideoFile, Interval FROM ProjectRecord LIMIT 1";
+        using var reader = await command.ExecuteReaderAsync();
+        if (await reader.ReadAsync())
+        {
+            var name = reader.GetString(0);
+            var videoFile = reader.GetString(1);
+            var interval = reader.GetTimeSpan(2);
+            Project project = new(name, videoFile, interval, new());
+            return project;
         }
-        return project;
+        throw new ApplicationException("Project not found");
+        //SQLiteAsyncConnection connection = new(path, Flags);//, SQLite.SQLiteOpenFlags.ReadWrite | SQLite.SQLiteOpenFlags.FullMutex);
+        //await using var _ = new ScopeGuard(connection.CloseAsync);
+        //var projectRecord = await connection.GetAsync<ProjectRecord>(1);
+        //var projectRecords = connection.Query<ProjectRecord>("SELECT * FROM ProjectRecord LIMIT 1");
+        //var projectRecord = projectRecords.First();
+
+
+        //var dimensionRecords = await connection.Table<DimensionRecord>()
+        //                                       .ToListAsync();
+        //foreach (var dimensionRecord in dimensionRecords)
+        //{
+        //    var optionRecords = await connection.Table<DimensionOptionRecord>()
+        //                                        .Where(o => o.DimensionId == dimensionRecord.Id)
+        //                                        .ToListAsync();
+        //    Dimension dimension = new()
+        //    {
+        //        Id = dimensionRecord.Id,
+        //        Name = dimensionRecord.Name,
+        //        Order = dimensionRecord.Order,
+        //        Optional = dimensionRecord.Optional,
+        //        DimensionOptions = new(optionRecords.Select(r => new DimensionOption(r.Id, r.Code, r.Name))),
+        //    };
+        //}
     }
 }
