@@ -13,25 +13,9 @@ public partial class MainPage : ContentPage
         InitializeComponent();
     }
 
-    void OnAppearing(object sender, EventArgs e)
-    {
-        base.OnAppearing();
-        var source = MediaSource.FromFile(@"C:\Users\gelecaro\OneDrive\Trabajo Sandra\Cristian.and.Caren_7°C_ClaseN°3y4_11.10.22.mp4");
-        mediaElement.Source = source;
-    }
-
-    void OnDisappearing(object sender, EventArgs e)
-    {
-        base.OnDisappearing();
-    }
-
     private void OnUnloaded(object sender, EventArgs e)
     {
         mediaElement.Handler?.DisconnectHandler();
-    }
-
-    private void MediaOpened(object sender, EventArgs e)
-    {
     }
 
     private void OnPlay() => mediaElement?.Play();

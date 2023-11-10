@@ -6,11 +6,9 @@ using System.Windows.Input;
 
 namespace Dissectr.ViewModels;
 
-public class StartViewModel: ObservableObject
+public partial class StartViewModel: ObservableObject
 {
     public ICommand AppearingCommand { get; }
-    public ICommand NewProjectCommand { get; }
-    public ICommand OpenProjectCommand { get; }
 
     private AppData appData = new();
 
@@ -18,8 +16,6 @@ public class StartViewModel: ObservableObject
     {
         RecentProjects = new();
         AppearingCommand = new AsyncRelayCommand(AppearingHandler);
-        NewProjectCommand = new AsyncRelayCommand(NewProjectHandler);
-        OpenProjectCommand = new RelayCommand(OpenProjectHandler);
     }
 
     public ObservableCollection<ProjectReference>  RecentProjects { get; }
@@ -32,13 +28,29 @@ public class StartViewModel: ObservableObject
             RecentProjects.Add(project);
         }
     }
-    private async Task NewProjectHandler()
+
+
+    [RelayCommand]
+    private async Task NewProject()
     {
         await Shell.Current.GoToAsync("//new-project");
     }
 
-    private void OpenProjectHandler()
+    [RelayCommand]
+    private async Task OpenProject()
     {
-        throw new NotImplementedException();
+        var result = await FilePicker.Default.PickAsync(new()
+        {
+            FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+            {
+                { DevicePlatform.WinUI, new[] { ".dissectr" } },
+                { DevicePlatform.macOS, new[] { "dissectr" } },
+            }),
+        });
+        if (result is null)
+        {
+            return;
+        }
+        await Shell.Current.GoToAsync($"//main?path={result.FullPath}");
     }
 }

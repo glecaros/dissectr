@@ -2,56 +2,8 @@
 
 namespace Dissectr.Models;
 
-internal class ScopeGuard : IAsyncDisposable
-{
-    private Func<Task> _action;
-
-    internal ScopeGuard(Func<Task> action)
-    {
-        _action = action;
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await _action().ConfigureAwait(false);
-    }
-}
-
 class Project
 {
-    private struct ProjectRecord
-    {
-        public int Id { get; set; }
-
-        public string Name { get; set; }
-
-        public string VideoFile { get; set; }
-
-        public TimeSpan Interval { get; set; }
-    }
-
-    private struct DimensionRecord
-    {
-        public Guid Id { get; set; }
-
-        public int Order { get; set; }
-
-        public string Name { get; set; }
-
-        public bool Optional { get; set; }
-    }
-
-    private struct DimensionOptionRecord
-    {
-        public Guid Id { get; set; }
-
-        public Guid DimensionId { get; set; }
-
-        public int Code { get; set; }
-
-        public string Name { get; set; }
-    }
-
     public string Name { get; set; }
     public string VideoFile { get; set; }
     public TimeSpan Interval { get; set; }
@@ -63,39 +15,6 @@ class Project
         VideoFile = videoFile;
         Interval = interval;
         Dimensions = dimensions;
-    }
-
-    private static ProjectRecord ToRecord(Project project)
-    {
-        return new ProjectRecord
-        {
-            Id = 1,
-            Name = project.Name,
-            VideoFile = project.VideoFile,
-            Interval = project.Interval,
-        };
-    }
-
-    private static DimensionRecord ToRecord(Dimension dimension)
-    {
-        return new DimensionRecord
-        {
-            Id = dimension.Id,
-            Order = dimension.Order,
-            Name = dimension.Name,
-            Optional = dimension.Optional,
-        };
-    }
-
-    private static DimensionOptionRecord ToRecord(Guid dimensionId, DimensionOption dimensionOption)
-    {
-        return new DimensionOptionRecord
-        {
-            Id = dimensionOption.Id,
-            DimensionId = dimensionId,
-            Name = dimensionOption.Name,
-            Code = dimensionOption.Code,
-        };
     }
 
     private static SqliteConnection CreateConnection(string path)
@@ -128,7 +47,7 @@ class Project
         command.CommandText = @"
             CREATE TABLE IF NOT EXISTS dimensions (
                 id TEXT PRIMARY KEY NOT NULL,
-                order INTEGER NOT NULL,
+                `order` INTEGER NOT NULL,
                 name TEXT,
                 optional INTEGER
             );";
@@ -141,27 +60,72 @@ class Project
         command.CommandText = @"
             CREATE TABLE IF NOT EXISTS dimension_options (
                 id TEXT PRIMARY KEY NOT NULL,
-                dimension_id TEXT,
+                dimensionId TEXT,
                 code INTEGER,
                 name TEXT,
-                FOREIGN KEY(dimension_id) REFERENCES dimensions(id)
+                FOREIGN KEY(dimensionId) REFERENCES dimensions(id)
             );";
         await command.ExecuteNonQueryAsync();
     }
 
-    private static void AddParameter(SqliteCommand command, string parameterName, object value)
+    private static SqliteParameter AddParameter(SqliteCommand command, string parameterName, object? value = null)
     {
         var parameter = command.CreateParameter();
         parameter.ParameterName = parameterName;
-        parameter.Value = value;
+        if (value is not null)
+        {
+            parameter.Value = value;
+        }
         command.Parameters.Add(parameter);
+        return parameter;
+    }
+
+    private static async Task InsertDimensions(SqliteConnection connection, IEnumerable<Dimension> dimensions)
+    {
+        var command = connection.CreateCommand();
+        command.CommandText = @"
+            INSERT INTO dimensions (id, `order`, name, optional)
+            VALUES ($id, $order, $name, $optional);";
+        var idParam = AddParameter(command, "$id");
+        var orderParam = AddParameter(command, "$order");
+        var nameParam = AddParameter(command, "$name");
+        var optionalParam = AddParameter(command, "$optional");
+        foreach (var dimension in dimensions)
+        {
+            idParam.Value = dimension.Id;
+            orderParam.Value = dimension.Order;
+            nameParam.Value = dimension.Name;
+            optionalParam.Value = dimension.Optional;
+            await command.ExecuteNonQueryAsync();
+
+            await InsertDimensionOptions(connection, dimension.Id, dimension.DimensionOptions);
+        }
+    }
+
+    private static async Task InsertDimensionOptions(SqliteConnection connection, Guid dimensionId, IEnumerable<DimensionOption> dimensionOptions)
+    {
+        var command = connection.CreateCommand();
+        command.CommandText = @"
+            INSERT INTO dimension_options (id, dimensionId, code, name)
+            VALUES ($id, $dimensionId, $code, $name);";
+        var idParam = AddParameter(command, "$id");
+        AddParameter(command, "$dimensionId", dimensionId);
+        var codeParam = AddParameter(command, "$code");
+        var nameParam = AddParameter(command, "$name");
+        foreach ( var dimensionOption in dimensionOptions)
+        {
+            idParam.Value = dimensionOption.Id;
+            codeParam.Value = dimensionOption.Code;
+            nameParam.Value = dimensionOption.Name;
+            await command.ExecuteNonQueryAsync();
+        }
     }
 
     public static async Task<string> CreateAsync(string path, Project project)
     {
         var fullProjectPath = Path.ChangeExtension(Path.Combine(path, project.Name), ".dissectr");
         using var connection = CreateConnection(fullProjectPath);
-
+        await connection.OpenAsync();
         using var transaction = connection.BeginTransaction();
 
         await CreateProjectTable(connection);
@@ -170,18 +134,63 @@ class Project
 
         var command = connection.CreateCommand();
         command.CommandText = @"
-            INSERT INTO project (id, name, videoFile, interval)
+            INSERT INTO projects (id, name, videoFile, interval)
             VALUES ($id, $name, $videoFile, $interval)
         ";
         AddParameter(command, "$id", 1);
         AddParameter(command, "$name", project.Name);
         AddParameter(command, "$videoFile", project.VideoFile);
         AddParameter(command, "$interval", project.Interval);
+        await command.ExecuteNonQueryAsync();
+
+        await InsertDimensions(connection, project.Dimensions);
 
         await transaction.CommitAsync();
+        await connection.CloseAsync();
+        return fullProjectPath;
+    }
 
+    private static async Task<List<DimensionOption>> LoadOptions(SqliteConnection connection, Guid dimensionId)
+    {
+        var command = connection.CreateCommand();
+        command.CommandText = "SELECT id, code, name FROM dimension_options WHERE dimensionId = $dimensionId;";
+        AddParameter(command, "$dimensionId", dimensionId);
+        using var reader = await command.ExecuteReaderAsync();
+        List<DimensionOption> options = new();
+        while (await reader.ReadAsync())
+        {
+            var id = reader.GetGuid(0);
+            var code = reader.GetInt32(1);
+            var name = reader.GetString(2);
+            options.Add(new(id, code, name));
+        }
+        return options;
+    }
 
-        return "lala";
+    private static async Task<List<Dimension>> LoadDimensions(SqliteConnection connection)
+    {
+        var command = connection.CreateCommand();
+        command.CommandText = @"SELECT id, `order`, name, optional FROM dimensions;";
+
+        using var reader = await command.ExecuteReaderAsync();
+        List<Dimension> dimensions = new();
+        while (await reader.ReadAsync())
+        {
+            var id = reader.GetGuid(0);
+            var order = reader.GetInt32(1);
+            var name = reader.GetString(2);
+            var optional = reader.GetBoolean(3);
+            var options = await LoadOptions(connection, id);
+            dimensions.Add(new()
+            {
+                Id = id,
+                Order = order,
+                Name = name,
+                Optional = optional,
+                DimensionOptions = new(options),
+            });
+        }
+        return dimensions;
     }
 
     public static async Task<Project> LoadAsync(string path)
@@ -194,39 +203,17 @@ class Project
         using var connection = new SqliteConnection(connectionString);
         await connection.OpenAsync();
         var command = connection.CreateCommand();
-        command.CommandText = "SELECT Name, VideoFile, Interval FROM ProjectRecord LIMIT 1";
+        command.CommandText = "SELECT name, videoFile, interval FROM projects LIMIT 1";
         using var reader = await command.ExecuteReaderAsync();
         if (await reader.ReadAsync())
         {
             var name = reader.GetString(0);
             var videoFile = reader.GetString(1);
             var interval = reader.GetTimeSpan(2);
-            Project project = new(name, videoFile, interval, new());
+            var dimensions = await LoadDimensions(connection);
+            Project project = new(name, videoFile, interval, new(dimensions));
             return project;
         }
         throw new ApplicationException("Project not found");
-        //SQLiteAsyncConnection connection = new(path, Flags);//, SQLite.SQLiteOpenFlags.ReadWrite | SQLite.SQLiteOpenFlags.FullMutex);
-        //await using var _ = new ScopeGuard(connection.CloseAsync);
-        //var projectRecord = await connection.GetAsync<ProjectRecord>(1);
-        //var projectRecords = connection.Query<ProjectRecord>("SELECT * FROM ProjectRecord LIMIT 1");
-        //var projectRecord = projectRecords.First();
-
-
-        //var dimensionRecords = await connection.Table<DimensionRecord>()
-        //                                       .ToListAsync();
-        //foreach (var dimensionRecord in dimensionRecords)
-        //{
-        //    var optionRecords = await connection.Table<DimensionOptionRecord>()
-        //                                        .Where(o => o.DimensionId == dimensionRecord.Id)
-        //                                        .ToListAsync();
-        //    Dimension dimension = new()
-        //    {
-        //        Id = dimensionRecord.Id,
-        //        Name = dimensionRecord.Name,
-        //        Order = dimensionRecord.Order,
-        //        Optional = dimensionRecord.Optional,
-        //        DimensionOptions = new(optionRecords.Select(r => new DimensionOption(r.Id, r.Code, r.Name))),
-        //    };
-        //}
     }
 }

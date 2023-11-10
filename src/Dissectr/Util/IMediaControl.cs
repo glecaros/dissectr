@@ -1,6 +1,6 @@
 ﻿namespace Dissectr.Util;
 
-internal interface IMediaControl
+public interface IMediaControl
 {
     event Action Play;
     event Action Pause;

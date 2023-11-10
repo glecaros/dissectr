@@ -17,4 +17,9 @@
         ContentTemplate="{DataTemplate views:NewProjectPage}"
         Route="new-project" />
 
+    <ShellContent
+        Title="Dissectr"
+        ContentTemplate="{DataTemplate views:MainPage}"
+        Route="main" />
+
 </Shell>

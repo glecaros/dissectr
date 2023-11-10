@@ -1,7 +1,60 @@
 using CommunityToolkit.Maui.Core.Primitives;
+using System.Reflection.Metadata;
 using System.Windows.Input;
 
 namespace Dissectr.Views;
+
+public class Interval
+{
+    private readonly TimeSpan _length;
+    private readonly TimeSpan _max;
+
+    public TimeSpan Start { get; }
+    public TimeSpan End { get; }
+
+    private Interval(TimeSpan start, TimeSpan length, TimeSpan max)
+    {
+        _length = length;
+        _max = max;
+        Start = start;
+        End = Min(Start + length, max);
+    }
+
+    public Interval(TimeSpan length, TimeSpan max): this(TimeSpan.Zero, length, max)
+    {
+    }
+
+    public Interval Next()
+    {
+        if (End == _max)
+        {
+            return this;
+        }
+        return new Interval(Start + _length, _length, _max);
+    }
+
+    public Interval Prev()
+    {
+        if (Start == TimeSpan.Zero)
+        {
+            return this;
+        }
+        return new Interval(Start - _length, _length, _max);
+    }
+
+    public Interval Seek(TimeSpan position)
+    {
+        if (position >= Start && position <= End)
+        {
+            return this;
+        }
+        var lengthTicks = _length.Ticks;
+        var newStartTicks = (position.Ticks / lengthTicks) * lengthTicks;
+        return new Interval(new TimeSpan(newStartTicks), _length, _max);
+    }
+
+    private static TimeSpan Min(TimeSpan a, TimeSpan b) => new TimeSpan(Math.Min(a.Ticks, b.Ticks));
+}
 
 public partial class MediaControls : ContentView
 {
@@ -29,7 +82,7 @@ public partial class MediaControls : ContentView
     {
         if (bindable is MediaControls mediaControls)
         {
-            mediaControls.AttachPosition();
+            mediaControls.HandlePositionChanged();
         }
     }
 
@@ -83,6 +136,45 @@ public partial class MediaControls : ContentView
     }
     #endregion
 
+    #region IntervalLenght Property
+    public static readonly BindableProperty IntervalLengthProperty = BindableProperty.Create(
+        nameof(IntervalLength),
+        typeof(TimeSpan),
+        typeof(MediaControls),
+        propertyChanged: OnIntervalLengthChanged);
+
+    static void OnIntervalLengthChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        if (bindable is MediaControls mediaControls)
+        {
+            mediaControls.HandleIntervalLengthChanged();
+        }
+    }
+
+    public TimeSpan IntervalLength
+    {
+        get => (TimeSpan)GetValue(IntervalLengthProperty);
+        set => SetValue(IntervalLengthProperty, value);
+    }
+    #endregion
+
+    #region CurrentInterval Property
+
+    private static readonly BindablePropertyKey CurrentIntervalPropertyKey = BindableProperty.CreateReadOnly(
+        nameof(CurrentInterval),
+        typeof(Interval),
+        typeof(MediaControls),
+        new Interval(TimeSpan.Zero, TimeSpan.Zero));
+
+    public static readonly BindableProperty CurrentIntervalProperty = CurrentIntervalPropertyKey.BindableProperty;
+
+    public Interval CurrentInterval
+    {
+        get => (Interval)GetValue(CurrentIntervalProperty);
+        private set => SetValue(CurrentIntervalPropertyKey, value);
+    }
+    #endregion
+
     public MediaControls()
     {
         InitializeComponent();
@@ -100,7 +192,19 @@ public partial class MediaControls : ContentView
 
     private void moveButtonClicked(object sender, EventArgs e)
     {
-
+        if (sender is Button button)
+        {
+            if (button.Id == moveBackButton.Id)
+            {
+                CurrentInterval = CurrentInterval.Prev();
+                Seek?.Execute(CurrentInterval.Start);
+            }
+            else if (button.Id == moveForwardButton.Id)
+            {
+                CurrentInterval = CurrentInterval.Next();
+                Seek?.Execute(CurrentInterval.Start);
+            }
+        }
     }
 
     private void togglePlayClicked(object sender, EventArgs e)
@@ -115,28 +219,24 @@ public partial class MediaControls : ContentView
         }
     }
 
-    private void stopButtonClicked(object sender, EventArgs e)
-    {
-
-    }
-
     public bool IsPlaying => PlaybackState == MediaElementState.Playing;
     private bool wasPlaying = false;
-    private bool isPositionBound = false;
-
+    private bool isAttached = false;
     private void AttachPosition()
     {
-        if (!isPositionBound)
+        if (!isAttached)
         {
             slider.SetBinding(PositionSlider.PositionProperty, new Binding("Position"));
+            isAttached = true;
         }
     }
 
     private void DetachPosition()
     {
-        if (isPositionBound)
+        if (isAttached)
         {
             slider.RemoveBinding(PositionProperty);
+            isAttached = false;
         }
     }
 
@@ -153,10 +253,26 @@ public partial class MediaControls : ContentView
     private void dragCompleted(object sender, EventArgs e)
     {
         var position = slider.Position;
+        CurrentInterval = CurrentInterval.Seek(position);
         Seek?.Execute(position);
         if (wasPlaying)
         {
             Play?.Execute(null);
         }
+    }
+
+    private void HandleIntervalLengthChanged()
+    {
+        Seek?.Execute(TimeSpan.Zero);
+        CurrentInterval = new Interval(IntervalLength, Duration);
+    }
+
+    private void HandlePositionChanged()
+    {
+        if (Position >= CurrentInterval.End)
+        {
+            Seek?.Execute(CurrentInterval.Start);
+        }
+        AttachPosition();
     }
 }

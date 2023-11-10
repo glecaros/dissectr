@@ -70,9 +70,6 @@
       <Compile Update="Views\StartPage.xaml.cs">
         <DependentUpon>StartPage.xaml</DependentUpon>
       </Compile>
-      <Compile Update="Views\ProjectPage.xaml.cs">
-        <DependentUpon>ProjectPage.xaml</DependentUpon>
-      </Compile>
     </ItemGroup>
 
     <ItemGroup>
@@ -90,9 +87,6 @@
         <Generator>MSBuild:Compile</Generator>
       </MauiXaml>
       <MauiXaml Update="Views\StartPage.xaml">
-        <Generator>MSBuild:Compile</Generator>
-      </MauiXaml>
-      <MauiXaml Update="Views\ProjectPage.xaml">
         <Generator>MSBuild:Compile</Generator>
       </MauiXaml>
     </ItemGroup>

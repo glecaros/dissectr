@@ -139,7 +139,7 @@ public partial class NewProjectViewModel: ObservableValidator
         var videoFile = Path.GetFileName(FilePath);
         Project project = new(Name, videoFile, IntervalLength, Dimensions.ToList());
         var file = await Project.CreateAsync(path, project);
-        await Shell.Current.GoToAsync($"//project?path={file}");
+        await Shell.Current.GoToAsync($"//main?path={file}");
     }
 
     [RelayCommand]

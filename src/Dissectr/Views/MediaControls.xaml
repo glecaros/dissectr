@@ -10,64 +10,83 @@
     <ContentView.Resources>
         <converters:MediaElementStateToPlaying x:Key="mediaElementStateToPlaying"/>
     </ContentView.Resources>
-    <VerticalStackLayout Padding="10" BindingContext="{x:Reference this}">
-        <Label
-            HorizontalOptions="Center"
-            TextColor="Black"
-            Text="{Binding Path=Position, StringFormat='{0:hh\\:mm\\:ss}'}" />
-        <views:PositionSlider
-            x:Name="slider"
-            Position="{Binding Position}"
-            Duration="{Binding Duration}"
-            VerticalOptions="CenterAndExpand"
-            DragStarted="dragStarted"
-            DragCompleted="dragCompleted"/>
-        <Label
-            HorizontalOptions="Center"
-            TextColor="Black"
-            Text="{Binding PlaybackState}"
-        />
-        <HorizontalStackLayout HorizontalOptions="Center" HeightRequest="100">
-            <Button
-                x:Name="zoomButton"
-                Clicked="zoomButtonClicked"
-                FontFamily="FontAwesomeFree"
-                Text="&#xf002;"/>
-            <Button
-                x:Name="loopButton"
-                Clicked="loopButtonClicked"
-                FontFamily="FontAwesomeFree"
-                Text="&#xf021;"/>
-            <Button
-                x:Name="moveBackButton"
-                Clicked="moveButtonClicked"
-                FontFamily="FontAwesomeFree"
-                Text="&#xf048;"/>
-            <Button
-                x:Name="togglePlayButton"
-                Clicked="togglePlayClicked"
-                Text="&#xf04b;"
-                FontFamily="FontAwesomeFree">
-                <Button.Triggers>
-                    <DataTrigger
-                        TargetType="Button"
-                        Binding="{Binding PlaybackState, Converter={x:StaticResource mediaElementStateToPlaying}}"
-                        Value="True">
-                        <Setter Property="Text" Value="&#xf04c;"/>
-                    </DataTrigger>
-                </Button.Triggers>
-            </Button>
-            <Button
-                x:Name="stopButton"
-                Clicked="stopButtonClicked"
-                FontFamily="FontAwesomeFree"
-                Text="&#xf04d;"/>
-            <Button
-                x:Name="moveForwardButton"
-                Clicked="moveButtonClicked"
-                FontFamily="FontAwesomeFree"
-                Text="&#xf051;"/>
-        </HorizontalStackLayout>
+    <Border
+        BindingContext="{x:Reference this}"
+        Stroke="{x:DynamicResource Primary}"
+        StrokeThickness="2">
+        <Grid Padding="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="30" />
+            </Grid.RowDefinitions>
+            <Label
+                Grid.Row="0"
+                x:Name="positionLabel"
+                HorizontalOptions="Center"
+                TextColor="Black"
+                Text="{Binding Source={x:Reference slider}, Path=Position, StringFormat='{0:hh\\:mm\\:ss}'}" />
+            <views:PositionSlider
+                Grid.Row="1"
+                x:Name="slider"
+                Position="{Binding Position}"
+                Duration="{Binding Duration}"
+                VerticalOptions="CenterAndExpand"
+                DragStarted="dragStarted"
+                DragCompleted="dragCompleted"/>
+            <Label
+                Grid.Row="2"
+                HorizontalOptions="Center"
+                TextColor="Black"
+                Text="{Binding PlaybackState}" />
+            <HorizontalStackLayout
+                Grid.Row="3"
+                HorizontalOptions="Center" HeightRequest="100">
+                <Button
+                    x:Name="zoomButton"
+                    Clicked="zoomButtonClicked"
+                    FontFamily="FontAwesomeFree"
+                    VerticalOptions="Center"
+                    Text="&#xf002;"/>
+                <Button
+                    x:Name="loopButton"
+                    Clicked="loopButtonClicked"
+                    FontFamily="FontAwesomeFree"
+                    VerticalOptions="Center"
+                    Text="&#xf021;"/>
+                <Button
+                    x:Name="moveBackButton"
+                    Clicked="moveButtonClicked"
+                    FontFamily="FontAwesomeFree"
+                    VerticalOptions="Center"
+                    Text="&#xf048;"/>
+                <Button
+                    x:Name="togglePlayButton"
+                    Clicked="togglePlayClicked"
+                    Text="&#xf04b;"
+                    FontFamily="FontAwesomeFree"
+                    VerticalOptions="Center">
+                    <Button.Triggers>
+                        <DataTrigger
+                            TargetType="Button"
+                            Binding="{Binding PlaybackState, Converter={x:StaticResource mediaElementStateToPlaying}}"
+                            Value="True">
+                            <Setter Property="Text" Value="&#xf04c;"/>
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+                <Button
+                    x:Name="moveForwardButton"
+                    Clicked="moveButtonClicked"
+                    FontFamily="FontAwesomeFree"
+                    VerticalOptions="Center"
+                    Text="&#xf051;"/>
+            </HorizontalStackLayout>
+        </Grid>
+    </Border>
 
-        </VerticalStackLayout>
 </ContentView>

@@ -1,51 +1,33 @@
-using System.Windows.Input;
 using CommunityToolkit.Maui.Core.Primitives;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-
+using Dissectr.Models;
 using Dissectr.Util;
 
 namespace Dissectr.ViewModels;
 
-internal partial class MainViewModel: ObservableObject, IMediaControl
+public partial class MainViewModel: ObservableObject, IMediaControl
 {
+    [ObservableProperty]
     private TimeSpan position;
-    public TimeSpan Position
-    {
-        get => position;
-        set => SetProperty(ref position, value);
-    }
 
+    [ObservableProperty]
     private TimeSpan duration;
-    public TimeSpan Duration
-    {
-        get => duration;
-        set => SetProperty(ref duration, value);
-    }
 
+    [ObservableProperty]
     private MediaElementState playbackState;
-    public MediaElementState PlaybackState
-    {
-        get => playbackState;
-        set => SetProperty(ref playbackState, value);
-    }
 
-    public ICommand OnPlay { get; }
-    public ICommand OnPause { get; }
-    public ICommand OnStop{ get; }
-    public ICommand OnSeek { get; }
+    [ObservableProperty]
+    private TimeSpan intervalLength = TimeSpan.Zero;
 
     public MainViewModel()
     {
-        OnPlay = new RelayCommand(PlayHandler);
-        OnPause = new RelayCommand(PauseHandler);
-        OnSeek = new RelayCommand<TimeSpan>(SeekHandler);
     }
 
     #region IMediaControl
-    public event Action Play;
-    public event Action Pause;
-    public event Action<TimeSpan> Seek;
+    public event Action? Play;
+    public event Action? Pause;
+    public event Action<TimeSpan>? Seek;
     #endregion
 
     private void RefreshProperties()
@@ -55,26 +37,37 @@ internal partial class MainViewModel: ObservableObject, IMediaControl
         OnPropertyChanged(nameof(PlaybackState));
     }
 
-    private void PlayHandler()
+    [RelayCommand]
+    private void OnPlay()
     {
         if (PlaybackState is not MediaElementState.Playing)
         {
-            Play.Invoke();
+            Play?.Invoke();
         }
     }
 
-    private void PauseHandler()
+    [RelayCommand]
+    private void OnPause()
     {
         if (PlaybackState is MediaElementState.Playing)
         {
-            Pause.Invoke();
+            Pause?.Invoke();
         }
     }
 
-    private void SeekHandler(TimeSpan position)
+    [RelayCommand]
+    private void OnSeek(TimeSpan position)
     {
-        Seek.Invoke(position);
+        Seek?.Invoke(position);
     }
 
+    [RelayCommand]
+    private void MediaOpened()
+    {
+        if (_project is Project project)
+        {
+            IntervalLength = project.Interval;
+        }
+    }
 
 }
