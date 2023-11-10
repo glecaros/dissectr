@@ -98,26 +98,89 @@ class Project
         };
     }
 
+    private static SqliteConnection CreateConnection(string path)
+    {
+        var connectionString = new SqliteConnectionStringBuilder
+        {
+            DataSource = path,
+            Mode = SqliteOpenMode.ReadWriteCreate,
+        }.ToString();
+        return new SqliteConnection(connectionString);
+    }
+
+
+    private static async Task CreateProjectTable(SqliteConnection connection)
+    {
+        var command = connection.CreateCommand();
+        command.CommandText = @"
+            CREATE TABLE IF NOT EXISTS projects (
+                id INT PRIMARY KEY NOT NULL,
+                name TEXT,
+                videoFile TEXT,
+                interval TEXT
+            );";
+        await command.ExecuteNonQueryAsync();
+    }
+
+    private static async Task CreateDimensionTable(SqliteConnection connection)
+    {
+        var command = connection.CreateCommand();
+        command.CommandText = @"
+            CREATE TABLE IF NOT EXISTS dimensions (
+                id TEXT PRIMARY KEY NOT NULL,
+                order INTEGER NOT NULL,
+                name TEXT,
+                optional INTEGER
+            );";
+        await command.ExecuteNonQueryAsync();
+    }
+
+    private static async Task CreateDimensionOptionsTable(SqliteConnection connection)
+    {
+        var command = connection.CreateCommand();
+        command.CommandText = @"
+            CREATE TABLE IF NOT EXISTS dimension_options (
+                id TEXT PRIMARY KEY NOT NULL,
+                dimension_id TEXT,
+                code INTEGER,
+                name TEXT,
+                FOREIGN KEY(dimension_id) REFERENCES dimensions(id)
+            );";
+        await command.ExecuteNonQueryAsync();
+    }
+
+    private static void AddParameter(SqliteCommand command, string parameterName, object value)
+    {
+        var parameter = command.CreateParameter();
+        parameter.ParameterName = parameterName;
+        parameter.Value = value;
+        command.Parameters.Add(parameter);
+    }
+
     public static async Task<string> CreateAsync(string path, Project project)
     {
-        //var fullProjectPath = Path.ChangeExtension(Path.Combine(path, project.Name), ".dissectr");
-        //SQLiteAsyncConnection connection = new(fullProjectPath, SQLite.SQLiteOpenFlags.Create | SQLite.SQLiteOpenFlags.ReadWrite | SQLite.SQLiteOpenFlags.FullMutex);
-        //await using var _ = new ScopeGuard(connection.CloseAsync);
-        //await connection.CreateTableAsync<ProjectRecord>();
-        //await connection.CreateTableAsync<DimensionRecord>();
-        //await connection.CreateTableAsync<DimensionOptionRecord>();
-        //await connection.InsertAsync(ToRecord(project));
-        //int order = 0;
-        //foreach (var dimension in project.Dimensions)
-        //{
-        //    dimension.Order = ++order;
-        //    var dimensionRecord = ToRecord(dimension);
-        //    await connection.InsertAsync(dimensionRecord);
-        //    var optionRecords = dimension.DimensionOptions.Select(o => ToRecord(dimensionRecord.Id, o));
-        //    await connection.InsertAllAsync(optionRecords);
-        //}
+        var fullProjectPath = Path.ChangeExtension(Path.Combine(path, project.Name), ".dissectr");
+        using var connection = CreateConnection(fullProjectPath);
 
-        //return fullProjectPath;
+        using var transaction = connection.BeginTransaction();
+
+        await CreateProjectTable(connection);
+        await CreateDimensionTable(connection);
+        await CreateDimensionOptionsTable(connection);
+
+        var command = connection.CreateCommand();
+        command.CommandText = @"
+            INSERT INTO project (id, name, videoFile, interval)
+            VALUES ($id, $name, $videoFile, $interval)
+        ";
+        AddParameter(command, "$id", 1);
+        AddParameter(command, "$name", project.Name);
+        AddParameter(command, "$videoFile", project.VideoFile);
+        AddParameter(command, "$interval", project.Interval);
+
+        await transaction.CommitAsync();
+
+
         return "lala";
     }
 
