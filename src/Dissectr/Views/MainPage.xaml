@@ -53,13 +53,37 @@
             PlaybackState="{Binding PlaybackState}"
             Play="{Binding PlayCommand}"
             Pause="{Binding PauseCommand}"
-            Seek="{Binding SeekCommand}"/>
+            Seek="{Binding SeekCommand}"
+            IntervalChanging="{Binding IntervalChangingCommand}"/>
         <Editor
             Grid.Row="3"
             Grid.Column="0"
+            Text="{Binding Transcription}"
             TextColor="Black"
             Placeholder="Enter the transcription here">
         </Editor>
+        <CollectionView
+            Grid.Row="1"
+            Grid.Column="1"
+            Grid.RowSpan="3"
+            ItemsSource="{Binding Dimensions}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <toolkit:Expander IsExpanded="True">
+                        <toolkit:Expander.Header>
+                            <Label Text="{Binding Dimension.Name}" />
+                        </toolkit:Expander.Header>
+                        <ListView ItemsSource="{Binding Dimension.DimensionOptions}">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <TextCell Text="{Binding Name}" />
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </toolkit:Expander>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
 
     </Grid>
 </ContentPage>

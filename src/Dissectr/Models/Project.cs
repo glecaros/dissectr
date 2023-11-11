@@ -283,6 +283,7 @@ class Project
     {
         var command = connection.CreateCommand();
         command.CommandText = @"SELECT dimensionId, optionId FROM EntryDimensions WHERE start = $start;";
+        AddParameter(command, "$start", intervalStart);
         var reader = await command.ExecuteReaderAsync();
         List<IntervalEntry.DimensionSelection> selections = Dimensions
             .Select(d => new IntervalEntry.DimensionSelection(d, null))
@@ -298,6 +299,11 @@ class Project
             selection.Selection = option;
         }
         return selections;
+    }
+
+    private static string? GetString(SqliteDataReader reader, int index)
+    {
+        return reader.IsDBNull(index) ? null : reader.GetString(index);
     }
 
     public async Task<IntervalEntry> GetEntry(TimeSpan intervalStart)
@@ -316,12 +322,12 @@ class Project
         var reader = await command.ExecuteReaderAsync();
         if (await reader.ReadAsync())
         {
-            var transcription = reader.GetString(0);
+            var transcription = GetString(reader, 0);
             var selections = await GetSelections(connection, intervalStart);
             return new()
             {
                 Start = intervalStart,
-                Transcription = transcription,
+                Transcription = transcription ?? string.Empty,
                 Dimensions = selections,
             };
         }
@@ -329,5 +335,52 @@ class Project
         {
             throw new ApplicationException($"Unexpected error: Did not find entry for {intervalStart.ToString(@"hh\:mm\:ss")}.");
         }
+    }
+
+    public async Task SaveEntry(IntervalEntry entry)
+    {
+        var connectionString = new SqliteConnectionStringBuilder()
+        {
+            DataSource = ProjectFile,
+            Mode = SqliteOpenMode.ReadWriteCreate,
+        }.ToString();
+        using var connection = new SqliteConnection(connectionString);
+        await connection.OpenAsync();
+        using var transaction = await connection.BeginTransactionAsync();
+
+        var command = connection.CreateCommand();
+        command.CommandText = @"
+            INSERT INTO IntervalEntries (start, transcription)
+            VALUES ($start, $transcription)
+            ON CONFLICT (start) DO UPDATE SET transcription = $transcription;";
+        AddParameter(command, "$start", entry.Start);
+        AddParameter(command, "$transcription", entry.Transcription);
+        await command.ExecuteNonQueryAsync();
+
+        command = connection.CreateCommand();
+        command.CommandText = @"
+            DELETE FROM EntryDimensions
+            WHERE start = $start;";
+        AddParameter(command, "$start", entry.Start);
+        await command.ExecuteNonQueryAsync();
+
+        command = connection.CreateCommand();
+        command.CommandText = @"
+            INSERT INTO EntryDimensions (start, dimensionId, optionId)
+            VALUES ($start, $dimensionId, $optionId)
+            ON CONFLICT (start, dimensionId) DO UPDATE SET optionId = $optionId;";
+        AddParameter(command, "$start", entry.Start);
+        var dimensionIdParam = AddParameter(command, "$dimensionId");
+        var optionIdParam = AddParameter(command, "$optionId");
+        foreach (var dimension in entry.Dimensions)
+        {
+            if (dimension.Selection is DimensionOption option)
+            {
+                dimensionIdParam.Value = dimension.Dimension.Id;
+                optionIdParam.Value = option.Id;
+                await command.ExecuteNonQueryAsync();
+            }
+        }
+        await transaction.CommitAsync();
     }
 }

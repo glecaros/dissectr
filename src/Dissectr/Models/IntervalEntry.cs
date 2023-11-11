@@ -2,7 +2,7 @@
 
 namespace Dissectr.Models;
 
-class IntervalEntry: ObservableObject
+public class IntervalEntry: ObservableObject
 {
     public struct DimensionSelection
     {
