@@ -5,13 +5,15 @@ namespace Dissectr.Models;
 class Project
 {
     public string Name { get; set; }
+    public string ProjectFile { get; set; }
     public string VideoFile { get; set; }
     public TimeSpan Interval { get; set; }
     public List<Dimension> Dimensions { get; set; }
 
-    public Project(string name, string videoFile, TimeSpan interval, List<Dimension> dimensions)
+    public Project(string name, string projectFile, string videoFile, TimeSpan interval, List<Dimension> dimensions)
     {
         Name = name;
+        ProjectFile = projectFile;
         VideoFile = videoFile;
         Interval = interval;
         Dimensions = dimensions;
@@ -64,6 +66,33 @@ class Project
                 code INTEGER,
                 name TEXT,
                 FOREIGN KEY(dimensionId) REFERENCES dimensions(id)
+            );";
+        await command.ExecuteNonQueryAsync();
+    }
+
+    private static async Task CreateEntriesTable(SqliteConnection connection)
+    {
+        var command = connection.CreateCommand();
+        command.CommandText = @"
+            CREATE TABLE IF NOT EXISTS IntervalEntries (
+                start TEXT PRIMARY KEY NOT NULL,
+                transcription TEXT
+            );";
+        await command.ExecuteNonQueryAsync();
+    }
+
+    private static async Task CreateEntryDimensionsTable(SqliteConnection connection)
+    {
+        var command = connection.CreateCommand();
+        command.CommandText = @"
+            CREATE TABLE IF NOT EXISTS EntryDimensions (
+                start TEXT NOT NULL,
+                dimensionId TEXT NOT NULL,
+                optionId TEXT NOT NULL,
+                FOREIGN KEY (start) REFERENCES IntervalEntries(start),
+                FOREIGN KEY (dimensionId) REFERENCES dimensions(id),
+                FOREIGN KEY (optionId) REFERENCES dimension_options(id),
+                PRIMARY KEY (start, dimensionId)
             );";
         await command.ExecuteNonQueryAsync();
     }
@@ -121,10 +150,9 @@ class Project
         }
     }
 
-    public static async Task<string> CreateAsync(string path, Project project)
+    public static async Task<string> CreateAsync(Project project)
     {
-        var fullProjectPath = Path.ChangeExtension(Path.Combine(path, project.Name), ".dissectr");
-        using var connection = CreateConnection(fullProjectPath);
+        using var connection = CreateConnection(project.ProjectFile);
         await connection.OpenAsync();
         using var transaction = connection.BeginTransaction();
 
@@ -147,7 +175,7 @@ class Project
 
         await transaction.CommitAsync();
         await connection.CloseAsync();
-        return fullProjectPath;
+        return project.ProjectFile;
     }
 
     private static async Task<List<DimensionOption>> LoadOptions(SqliteConnection connection, Guid dimensionId)
@@ -211,9 +239,95 @@ class Project
             var videoFile = reader.GetString(1);
             var interval = reader.GetTimeSpan(2);
             var dimensions = await LoadDimensions(connection);
-            Project project = new(name, videoFile, interval, new(dimensions));
+            Project project = new(name, path, videoFile, interval, new(dimensions));
             return project;
         }
         throw new ApplicationException("Project not found");
+    }
+
+    public async Task InitEntryTables(TimeSpan totalDuration)
+    {
+        var connectionString = new SqliteConnectionStringBuilder()
+        {
+            DataSource = ProjectFile,
+            Mode = SqliteOpenMode.ReadWriteCreate,
+        }.ToString();
+        using var connection = new SqliteConnection(connectionString);
+        await connection.OpenAsync();
+        await CreateEntriesTable(connection);
+        await CreateEntryDimensionsTable(connection);
+
+        var totalDurationInTicks = totalDuration.Ticks;
+        var intervalInTicks = Interval.Ticks;
+        List<TimeSpan> intervalStarts = Enumerable.Range(0, (int)(totalDurationInTicks / intervalInTicks))
+            .Select(x => TimeSpan.FromTicks(x * intervalInTicks))
+            .ToList();
+
+        using var transaction = await connection.BeginTransactionAsync();
+        var command = connection.CreateCommand();
+        command.CommandText = @"
+            INSERT INTO IntervalEntries (start)
+            VALUES ($start)
+            ON CONFLICT (start) DO NOTHING;";
+        var startParam = AddParameter(command, "$start");
+
+        foreach (var start in intervalStarts)
+        {
+            startParam.Value = start;
+            await command.ExecuteNonQueryAsync();
+        }
+        await transaction.CommitAsync();
+    }
+
+    private async Task<List<IntervalEntry.DimensionSelection>> GetSelections(SqliteConnection connection, TimeSpan intervalStart)
+    {
+        var command = connection.CreateCommand();
+        command.CommandText = @"SELECT dimensionId, optionId FROM EntryDimensions WHERE start = $start;";
+        var reader = await command.ExecuteReaderAsync();
+        List<IntervalEntry.DimensionSelection> selections = Dimensions
+            .Select(d => new IntervalEntry.DimensionSelection(d, null))
+            .ToList();
+        while (await reader.ReadAsync())
+        {
+            var dimensionId = reader.GetGuid(0);
+            var optionId = reader.GetGuid(0);
+            /* TODO: We should do something more robust here (First explodes) */
+            var selection = selections.Where(s => s.Dimension.Id == dimensionId).First();
+
+            var option = selection.Dimension.DimensionOptions.Where(o => o.Id == optionId).First();
+            selection.Selection = option;
+        }
+        return selections;
+    }
+
+    public async Task<IntervalEntry> GetEntry(TimeSpan intervalStart)
+    {
+        var connectionString = new SqliteConnectionStringBuilder()
+        {
+            DataSource = ProjectFile,
+            Mode = SqliteOpenMode.ReadWriteCreate,
+        }.ToString();
+        using var connection = new SqliteConnection(connectionString);
+        await connection.OpenAsync();
+
+        var command = connection.CreateCommand();
+        command.CommandText = @"SELECT transcription FROM IntervalEntries WHERE start = $start;";
+        AddParameter(command, "$start", intervalStart);
+        var reader = await command.ExecuteReaderAsync();
+        if (await reader.ReadAsync())
+        {
+            var transcription = reader.GetString(0);
+            var selections = await GetSelections(connection, intervalStart);
+            return new()
+            {
+                Start = intervalStart,
+                Transcription = transcription,
+                Dimensions = selections,
+            };
+        }
+        else
+        {
+            throw new ApplicationException($"Unexpected error: Did not find entry for {intervalStart.ToString(@"hh\:mm\:ss")}.");
+        }
     }
 }

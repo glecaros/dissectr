@@ -20,4 +20,8 @@ public partial class Dimension: ObservableObject
     [ObservableProperty]
     private ObservableCollection<DimensionOption> dimensionOptions = new();
 
+    public override int GetHashCode()
+    {
+        return Id.GetHashCode();
+    }
 }

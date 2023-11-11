@@ -137,8 +137,9 @@ public partial class NewProjectViewModel: ObservableValidator
     {
         var path = Path.GetDirectoryName(FilePath);
         var videoFile = Path.GetFileName(FilePath);
-        Project project = new(Name, videoFile, IntervalLength, Dimensions.ToList());
-        var file = await Project.CreateAsync(path, project);
+        var fullProjectPath = Path.ChangeExtension(Path.Combine(path, Name), ".dissectr");
+        Project project = new(Name, fullProjectPath, videoFile, IntervalLength, Dimensions.ToList());
+        var file = await Project.CreateAsync(project);
         await Shell.Current.GoToAsync($"//main?path={file}");
     }
 

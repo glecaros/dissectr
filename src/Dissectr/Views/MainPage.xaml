@@ -10,7 +10,7 @@
              BindingContextChanged="OnBindingContextChanged"
              BackgroundColor="White">
     <ContentPage.BindingContext>
-        <viewModels:MainViewModel />
+        <viewModels:MainViewModel/>
     </ContentPage.BindingContext>
     <ContentPage.MenuBarItems>
         <MenuBarItem Text="File">
@@ -38,7 +38,10 @@
             Source="{Binding MediaSource}"
             CurrentState="{Binding PlaybackState, Mode=OneWayToSource}">
             <toolkit:MediaElement.Behaviors>
-                <toolkit:EventToCommandBehavior Command="{Binding MediaOpenedCommand}" EventName="MediaOpened" />
+                <toolkit:EventToCommandBehavior
+                    Command="{Binding OpenedCommand}"
+                    CommandParameter="{Binding Source={x:Reference mediaElement}, Path=Duration}}"
+                    EventName="MediaOpened" />
             </toolkit:MediaElement.Behaviors>
         </toolkit:MediaElement>
         <views:MediaControls

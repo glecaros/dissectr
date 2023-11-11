@@ -39,5 +39,13 @@ public partial class MainPage : ContentPage
         }
         currentMediaControl = BindingContext as IMediaControl;
     }
+
+    private void MediaOpened(object sender, EventArgs e)
+    {
+        /*if (currentMediaControl is IMediaControl mediaControl)
+        {
+            await mediaControl.OpenedAsync(mediaElement.Duration);
+        }*/
+    }
 }
 

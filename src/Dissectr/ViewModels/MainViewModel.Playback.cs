@@ -62,12 +62,13 @@ public partial class MainViewModel: ObservableObject, IMediaControl
     }
 
     [RelayCommand]
-    private void MediaOpened()
+    public async Task OnOpened(TimeSpan duration)
     {
+        Duration = duration;
         if (_project is Project project)
         {
             IntervalLength = project.Interval;
+            await project.InitEntryTables(Duration);
         }
     }
-
 }

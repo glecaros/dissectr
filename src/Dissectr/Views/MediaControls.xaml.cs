@@ -136,6 +136,16 @@ public partial class MediaControls : ContentView
     }
     #endregion
 
+    #region IntervalChanging Property
+    public static readonly BindableProperty IntervalChangingProperty = BindableProperty.Create(nameof(IntervalChanging), typeof(ICommand), typeof(MediaControls));
+
+    public ICommand IntervalChanging
+    {
+        get => (ICommand)GetValue(IntervalChangingProperty);
+        set => SetValue(IntervalChangingProperty, value);
+    }
+    #endregion
+
     #region IntervalLenght Property
     public static readonly BindableProperty IntervalLengthProperty = BindableProperty.Create(
         nameof(IntervalLength),
@@ -159,12 +169,20 @@ public partial class MediaControls : ContentView
     #endregion
 
     #region CurrentInterval Property
-
     private static readonly BindablePropertyKey CurrentIntervalPropertyKey = BindableProperty.CreateReadOnly(
         nameof(CurrentInterval),
         typeof(Interval),
         typeof(MediaControls),
-        new Interval(TimeSpan.Zero, TimeSpan.Zero));
+        new Interval(TimeSpan.Zero, TimeSpan.Zero),
+        propertyChanging: OnIntervalChanging);
+
+    private static void OnIntervalChanging(BindableObject bindable, object oldValue, object newValue)
+    {
+        if (bindable is MediaControls mediaControls)
+        {
+            mediaControls.HandleIntervalChanging((Interval)newValue);
+        }
+    }
 
     public static readonly BindableProperty CurrentIntervalProperty = CurrentIntervalPropertyKey.BindableProperty;
 
@@ -274,5 +292,10 @@ public partial class MediaControls : ContentView
             Seek?.Execute(CurrentInterval.Start);
         }
         AttachPosition();
+    }
+
+    private void HandleIntervalChanging(Interval newValue)
+    {
+        IntervalChanging?.Execute(newValue);
     }
 }
