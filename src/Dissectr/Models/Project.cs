@@ -190,7 +190,7 @@ class Project
             var id = reader.GetGuid(0);
             var code = reader.GetInt32(1);
             var name = reader.GetString(2);
-            options.Add(new(id, code, name));
+            options.Add(new(id, dimensionId, code, name));
         }
         return options;
     }

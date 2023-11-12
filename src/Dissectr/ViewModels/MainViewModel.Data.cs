@@ -17,6 +17,27 @@ public partial class MainViewModel
     private ObservableCollection<IntervalEntry.DimensionSelection>? dimensions;
 
     [RelayCommand]
+    private async Task OnOptionSelected(DimensionOption option)
+    {
+        if (_project is null)
+        {
+            throw new ApplicationException("Unexpected error, project is null");
+        }
+        if (intervalEntry is null)
+        {
+            throw new ApplicationException("Unexpected error, intervalEntry is null");
+        }
+        if (Dimensions is null)
+        {
+            throw new ApplicationException("Unexpected error, dimensions is null");
+        }
+        var dimension = Dimensions.First(d => d.Dimension.Id == option.DimensionId);
+        dimension.Selection = option;
+        intervalEntry.Dimensions = Dimensions.ToList();
+        await _project.SaveEntry(intervalEntry);
+    }
+
+    [RelayCommand]
     private async Task OnIntervalChanging(Interval newInterval)
     {
         if (_project is null)

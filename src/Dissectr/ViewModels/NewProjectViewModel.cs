@@ -114,7 +114,7 @@ public partial class NewProjectViewModel: ObservableValidator
             0 => 0,
             _ => dimension.DimensionOptions.Select(d => d.Code).Max(),
         };
-        dimension.DimensionOptions.Add(new DimensionOption(Guid.NewGuid(), maxCode + 1, "New option"));
+        dimension.DimensionOptions.Add(new DimensionOption(Guid.NewGuid(), dimension.Id, maxCode + 1, "New option"));
     }
 
     [RelayCommand]

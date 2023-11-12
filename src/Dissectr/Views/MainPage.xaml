@@ -6,6 +6,7 @@
              xmlns:views="clr-namespace:Dissectr.Views"
              xmlns:viewModels="clr-namespace:Dissectr.ViewModels"
              x:Class="Dissectr.Views.MainPage"
+             x:Name="view"
              Unloaded="OnUnloaded"
              BindingContextChanged="OnBindingContextChanged"
              BackgroundColor="White">
@@ -70,13 +71,33 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <toolkit:Expander IsExpanded="True">
+                        <toolkit:Expander.Triggers>
+                            <DataTrigger
+                                TargetType="toolkit:Expander"
+                                Binding="{Binding Selection, Converter={x:StaticResource IsNotNull}}"
+                                Value="True">
+                                <Setter Property="IsExpanded" Value="False" />
+                            </DataTrigger>
+                        </toolkit:Expander.Triggers>
                         <toolkit:Expander.Header>
-                            <Label Text="{Binding Dimension.Name}" />
+                            <Label Text="{Binding Dimension.Name}" TextColor="Black">
+                                <Label.Triggers>
+                                    <DataTrigger
+                                        TargetType="Label"
+                                        Binding="{Binding Selection, Converter={x:StaticResource IsNotNull}}"
+                                        Value="True">
+                                        <Setter Property="TextColor" Value="Green" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
                         </toolkit:Expander.Header>
-                        <ListView ItemsSource="{Binding Dimension.DimensionOptions}">
+                        <ListView
+                            ItemsSource="{Binding Dimension.DimensionOptions}"
+                            SelectedItem="{Binding Selection}">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <TextCell Text="{Binding Name}" />
+                                    <TextCell
+                                        Text="{Binding Name}" />
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>

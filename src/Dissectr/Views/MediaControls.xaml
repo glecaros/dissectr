@@ -41,8 +41,18 @@
             <Label
                 Grid.Row="2"
                 HorizontalOptions="Center"
-                TextColor="Black"
-                Text="{Binding PlaybackState}" />
+                TextColor="Black">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="{Binding PlaybackState}" />
+                        <Span Text="[" />
+                        <Span Text="{Binding CurrentInterval.Start, StringFormat='{0:hh\\:mm\\:ss}'}" />
+                        <Span Text="&#xf061;" FontFamily="FontAwesomeFree" />
+                        <Span Text="{Binding CurrentInterval.End, StringFormat='{0:hh\\:mm\\:ss}'}" />
+                        <Span Text="]" />
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
             <HorizontalStackLayout
                 Grid.Row="3"
                 HorizontalOptions="Center" HeightRequest="100">
