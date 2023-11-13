@@ -55,4 +55,14 @@ public partial class MainViewModel
         Transcription = intervalEntry.Transcription;
         Dimensions = new(intervalEntry.Dimensions);
     }
+
+    [RelayCommand]
+    private void ToggleDimensionVisibility(Guid dimensionId)
+    {
+        var dimension = Dimensions?.FirstOrDefault(d => d.Dimension.Id == dimensionId);
+        if (dimension is not null)
+        {
+            dimension.IsVisible = !dimension.IsVisible;
+        }
+    }
 }

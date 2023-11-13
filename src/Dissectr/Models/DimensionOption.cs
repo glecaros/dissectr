@@ -16,6 +16,9 @@ public partial class DimensionOption : ObservableObject
     [ObservableProperty]
     private string name = string.Empty;
 
+    [ObservableProperty]
+    private bool isSelected = false;
+
     public override bool Equals(object? obj)
     {
         if (obj is DimensionOption other)

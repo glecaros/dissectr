@@ -46,6 +46,11 @@ public partial class MainPage : ContentPage
         if (listView?.BindingContext is IntervalEntry.DimensionSelection entry)
         {
             entry.Selection = e.SelectedItem as DimensionOption;
+            foreach (var o in entry.Dimension.DimensionOptions)
+            {
+                o.IsSelected = o == entry.Selection;
+            }
+            entry.IsVisible = listView.SelectedItem is null;
         }
     }
 
@@ -55,6 +60,23 @@ public partial class MainPage : ContentPage
         if (listView?.BindingContext is IntervalEntry.DimensionSelection entry)
         {
             listView.SelectedItem = entry.Selection;
+            foreach (var o in entry.Dimension.DimensionOptions)
+            {
+                o.IsSelected = o == entry.Selection;
+            }
+        }
+    }
+
+    private void ToggleDimension(object sender, EventArgs e)
+    {
+        var button = sender as Button;
+        if (button?.BindingContext is IntervalEntry.DimensionSelection entry)
+        {
+            entry.IsVisible = !entry.IsVisible;
+            if (button.Parent.FindByName<ListView>("dimensionList") is ListView list)
+            {
+                list.IsVisible = entry.IsVisible;
+            }
         }
 
     }

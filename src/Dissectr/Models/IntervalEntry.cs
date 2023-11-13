@@ -19,6 +19,9 @@ public partial class IntervalEntry: ObservableObject
 
         [ObservableProperty]
         private DimensionOption? selection;
+
+        [ObservableProperty]
+        private bool isVisible = true;
     }
 
     public required TimeSpan Start { get; init; }

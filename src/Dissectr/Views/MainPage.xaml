@@ -10,7 +10,7 @@
              Unloaded="OnUnloaded"
              BindingContextChanged="OnBindingContextChanged">
     <ContentPage.BindingContext>
-        <viewModels:MainViewModel/>
+        <viewModels:MainViewModel x:Name="mainViewModel" />
     </ContentPage.BindingContext>
     <ContentPage.MenuBarItems>
         <MenuBarItem Text="File">
@@ -76,20 +76,27 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
-                        <Border BackgroundColor="{x:DynamicResource Primary}">
-                            <Label
-                                Text="{Binding Dimension.Name}"
-                                HorizontalOptions="Center"
-                                VerticalOptions="Center" />
-                        </Border>
+                        <Button
+                            CornerRadius="0"
+                            BorderWidth="0"
+                            Padding="1"
+                            Clicked="ToggleDimension"
+                            TextColor="{x:DynamicResource Secondary}"
+                            HeightRequest="30"
+                            MinimumHeightRequest="30"
+                            Text="{Binding Dimension.Name}"
+                            HorizontalOptions="Fill"
+                            VerticalOptions="Center" />
+                            <!--Command="{Binding ToggleDimensionVisibilityCommand, Source={x:Reference mainViewModel}}"
+                            CommandParameter="{Binding Dimension.Id}"-->
                         <ListView
+                                x:Name="dimensionList"
                                 Loaded="DimensionListLoaded"
                                 Grid.Row="1"
                                 HorizontalOptions="CenterAndExpand"
                                 SelectionMode="Single"
                                 ItemsSource="{Binding Dimension.DimensionOptions}"
-                                ItemSelected="DimensionOptionSelected">
-
+                                ItemSelected="DimensionOptionSelected">>
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <ViewCell>
@@ -101,11 +108,18 @@
                                                 <ColumnDefinition Width="30" />
                                                 <ColumnDefinition Width="*" />
                                             </Grid.ColumnDefinitions>
-                                            <Label Grid.Column="0" />
-
+                                            <Label
+                                                Grid.Column="0"
+                                                Text="&#xf00c;"
+                                                FontFamily="FontAwesomeFree"
+                                                VerticalOptions="Center"
+                                                Margin="10,0,0,0"
+                                                IsVisible="{Binding IsSelected}">
+                                            </Label>
                                             <Label
                                                 Grid.Row="0"
                                                 Grid.Column="1"
+                                                VerticalOptions="Center"
                                                 Text="{Binding Name}" />
                                         </Grid>
                                     </ViewCell>
