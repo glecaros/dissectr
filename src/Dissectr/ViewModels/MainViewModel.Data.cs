@@ -33,7 +33,7 @@ public partial class MainViewModel
         }
         var dimension = Dimensions.First(d => d.Dimension.Id == option.DimensionId);
         dimension.Selection = option;
-        intervalEntry.Dimensions = Dimensions.ToList();
+        intervalEntry.Dimensions = Dimensions;
         await _project.SaveEntry(intervalEntry);
     }
 
@@ -48,7 +48,7 @@ public partial class MainViewModel
         if (intervalEntry is IntervalEntry entry)
         {
             intervalEntry.Transcription = Transcription ?? string.Empty;
-            intervalEntry.Dimensions = Dimensions?.ToList() ?? new();
+            intervalEntry.Dimensions = Dimensions ?? new();
             await _project.SaveEntry(entry);
         }
         intervalEntry = await _project.GetEntry(newInterval.Start);

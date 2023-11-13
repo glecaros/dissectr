@@ -1,7 +1,7 @@
 using System.ComponentModel;
 
 using CommunityToolkit.Maui.Views;
-
+using Dissectr.Models;
 using Dissectr.Util;
 
 namespace Dissectr.Views;
@@ -40,12 +40,23 @@ public partial class MainPage : ContentPage
         currentMediaControl = BindingContext as IMediaControl;
     }
 
-    private void MediaOpened(object sender, EventArgs e)
+    private void DimensionOptionSelected(object sender, SelectedItemChangedEventArgs e)
     {
-        /*if (currentMediaControl is IMediaControl mediaControl)
+        var listView = sender as ListView;
+        if (listView?.BindingContext is IntervalEntry.DimensionSelection entry)
         {
-            await mediaControl.OpenedAsync(mediaElement.Duration);
-        }*/
+            entry.Selection = e.SelectedItem as DimensionOption;
+        }
+    }
+
+    private void DimensionListLoaded(object sender, EventArgs e)
+    {
+        var listView = sender as ListView;
+        if (listView?.BindingContext is IntervalEntry.DimensionSelection entry)
+        {
+            listView.SelectedItem = entry.Selection;
+        }
+
     }
 }
 

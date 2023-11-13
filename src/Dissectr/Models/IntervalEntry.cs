@@ -1,10 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using System.Collections.ObjectModel;
 
 namespace Dissectr.Models;
 
-public class IntervalEntry: ObservableObject
+public partial class IntervalEntry: ObservableObject
 {
-    public struct DimensionSelection
+
+    public partial class DimensionSelection: ObservableObject
     {
         public DimensionSelection(Dimension dimension, DimensionOption? selection = null)
         {
@@ -12,12 +14,18 @@ public class IntervalEntry: ObservableObject
             Selection = selection;
         }
 
-        public Dimension Dimension { get; set; }
+        [ObservableProperty]
+        private Dimension dimension;
 
-        public DimensionOption? Selection { get; set; }
+        [ObservableProperty]
+        private DimensionOption? selection;
     }
 
     public required TimeSpan Start { get; init; }
-    public string Transcription { get; set; } = string.Empty;
-    public List<DimensionSelection> Dimensions { get; set; } = new();
+
+    [ObservableProperty]
+    public string? transcription;
+
+    [ObservableProperty]
+    public ObservableCollection<DimensionSelection> dimensions = new();
 }

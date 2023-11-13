@@ -190,7 +190,7 @@ class Project
             var id = reader.GetGuid(0);
             var code = reader.GetInt32(1);
             var name = reader.GetString(2);
-            options.Add(new(id, dimensionId, code, name));
+            options.Add(new (){ Id = id, DimensionId = dimensionId, Code = code, Name = name });
         }
         return options;
     }
@@ -291,7 +291,7 @@ class Project
         while (await reader.ReadAsync())
         {
             var dimensionId = reader.GetGuid(0);
-            var optionId = reader.GetGuid(0);
+            var optionId = reader.GetGuid(1);
             /* TODO: We should do something more robust here (First explodes) */
             var selection = selections.Where(s => s.Dimension.Id == dimensionId).First();
 
@@ -328,7 +328,7 @@ class Project
             {
                 Start = intervalStart,
                 Transcription = transcription ?? string.Empty,
-                Dimensions = selections,
+                Dimensions = new(selections),
             };
         }
         else

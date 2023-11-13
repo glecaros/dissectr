@@ -8,8 +8,7 @@
              x:Class="Dissectr.Views.MainPage"
              x:Name="view"
              Unloaded="OnUnloaded"
-             BindingContextChanged="OnBindingContextChanged"
-             BackgroundColor="White">
+             BindingContextChanged="OnBindingContextChanged">
     <ContentPage.BindingContext>
         <viewModels:MainViewModel/>
     </ContentPage.BindingContext>
@@ -41,7 +40,7 @@
             <toolkit:MediaElement.Behaviors>
                 <toolkit:EventToCommandBehavior
                     Command="{Binding OpenedCommand}"
-                    CommandParameter="{Binding Source={x:Reference mediaElement}, Path=Duration}}"
+                    CommandParameter="{Binding Source={x:Reference mediaElement}, Path=Duration}"
                     EventName="MediaOpened" />
             </toolkit:MediaElement.Behaviors>
         </toolkit:MediaElement>
@@ -60,7 +59,6 @@
             Grid.Row="3"
             Grid.Column="0"
             Text="{Binding Transcription}"
-            TextColor="Black"
             Placeholder="Enter the transcription here">
         </Editor>
         <CollectionView
@@ -70,38 +68,51 @@
             ItemsSource="{Binding Dimensions}">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
-                    <toolkit:Expander IsExpanded="True">
-                        <toolkit:Expander.Triggers>
-                            <DataTrigger
-                                TargetType="toolkit:Expander"
-                                Binding="{Binding Selection, Converter={x:StaticResource IsNotNull}}"
-                                Value="True">
-                                <Setter Property="IsExpanded" Value="False" />
-                            </DataTrigger>
-                        </toolkit:Expander.Triggers>
-                        <toolkit:Expander.Header>
-                            <Label Text="{Binding Dimension.Name}" TextColor="Black">
-                                <Label.Triggers>
-                                    <DataTrigger
-                                        TargetType="Label"
-                                        Binding="{Binding Selection, Converter={x:StaticResource IsNotNull}}"
-                                        Value="True">
-                                        <Setter Property="TextColor" Value="Green" />
-                                    </DataTrigger>
-                                </Label.Triggers>
-                            </Label>
-                        </toolkit:Expander.Header>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="30" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Border BackgroundColor="{x:DynamicResource Primary}">
+                            <Label
+                                Text="{Binding Dimension.Name}"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center" />
+                        </Border>
                         <ListView
-                            ItemsSource="{Binding Dimension.DimensionOptions}"
-                            SelectedItem="{Binding Selection}">
+                                Loaded="DimensionListLoaded"
+                                Grid.Row="1"
+                                HorizontalOptions="CenterAndExpand"
+                                SelectionMode="Single"
+                                ItemsSource="{Binding Dimension.DimensionOptions}"
+                                ItemSelected="DimensionOptionSelected">
+
                             <ListView.ItemTemplate>
                                 <DataTemplate>
-                                    <TextCell
-                                        Text="{Binding Name}" />
+                                    <ViewCell>
+                                        <Grid >
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="30" />
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="30" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Column="0" />
+
+                                            <Label
+                                                Grid.Row="0"
+                                                Grid.Column="1"
+                                                Text="{Binding Name}" />
+                                        </Grid>
+                                    </ViewCell>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
-                    </toolkit:Expander>
+                    </Grid>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
