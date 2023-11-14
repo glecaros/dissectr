@@ -66,19 +66,5 @@ public partial class MainPage : ContentPage
             }
         }
     }
-
-    private void ToggleDimension(object sender, EventArgs e)
-    {
-        var button = sender as Button;
-        if (button?.BindingContext is IntervalEntry.DimensionSelection entry)
-        {
-            entry.IsVisible = !entry.IsVisible;
-            if (button.Parent.FindByName<ListView>("dimensionList") is ListView list)
-            {
-                list.IsVisible = entry.IsVisible;
-            }
-        }
-
-    }
 }
 

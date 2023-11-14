@@ -19,13 +19,6 @@ public class AppData
     {
         //SQLiteAsyncConnection connection = await EnsureInit();
         //recentProjects = await connection.Table<ProjectReference>().ToListAsync();
-        return new List<ProjectReference>
-        {
-            new ProjectReference{ Id = Guid.NewGuid(), LastOpened = DateTimeOffset.Now, Name = "Test1", Path = "C:\\Users\\james\\Videos\\test1.mp4" },
-            new ProjectReference{ Id = Guid.NewGuid(), LastOpened = DateTimeOffset.Now, Name = "Test2", Path = "C:\\Users\\james\\Videos\\test2.mp4" },
-            new ProjectReference{ Id = Guid.NewGuid(), LastOpened = DateTimeOffset.Now, Name = "Test3", Path = "C:\\Users\\james\\Videos\\test3.mp4" },
-            new ProjectReference{ Id = Guid.NewGuid(), LastOpened = DateTimeOffset.Now, Name = "Test4", Path = "C:\\Users\\james\\Videos\\test4.mp4" },
-        };
     }
 
     public async Task SaveRecentProjectsAsync(IEnumerable<ProjectReference> recentProjects)
