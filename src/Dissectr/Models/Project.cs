@@ -60,7 +60,7 @@ class Project
     {
         var command = connection.CreateCommand();
         command.CommandText = @"
-            CREATE TABLE IF NOT EXISTS dimension_options (
+            CREATE TABLE IF NOT EXISTS dimensionOptions (
                 id TEXT PRIMARY KEY NOT NULL,
                 dimensionId TEXT,
                 code INTEGER,
@@ -91,7 +91,7 @@ class Project
                 optionId TEXT NOT NULL,
                 FOREIGN KEY (start) REFERENCES IntervalEntries(start),
                 FOREIGN KEY (dimensionId) REFERENCES dimensions(id),
-                FOREIGN KEY (optionId) REFERENCES dimension_options(id),
+                FOREIGN KEY (optionId) REFERENCES dimensionOptions(id),
                 PRIMARY KEY (start, dimensionId)
             );";
         await command.ExecuteNonQueryAsync();
@@ -135,7 +135,7 @@ class Project
     {
         var command = connection.CreateCommand();
         command.CommandText = @"
-            INSERT INTO dimension_options (id, dimensionId, code, name)
+            INSERT INTO dimensionOptions (id, dimensionId, code, name)
             VALUES ($id, $dimensionId, $code, $name);";
         var idParam = AddParameter(command, "$id");
         AddParameter(command, "$dimensionId", dimensionId);
@@ -181,7 +181,7 @@ class Project
     private static async Task<List<DimensionOption>> LoadOptions(SqliteConnection connection, Guid dimensionId)
     {
         var command = connection.CreateCommand();
-        command.CommandText = "SELECT id, code, name FROM dimension_options WHERE dimensionId = $dimensionId;";
+        command.CommandText = "SELECT id, code, name FROM dimensionOptions WHERE dimensionId = $dimensionId;";
         AddParameter(command, "$dimensionId", dimensionId);
         using var reader = await command.ExecuteReaderAsync();
         List<DimensionOption> options = new();
