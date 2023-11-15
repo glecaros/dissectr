@@ -15,14 +15,17 @@ public class AppData
     //    return connection;
     //}
 
-    public async Task<List<ProjectReference>> GetRecentProjectsAsync()
+    public Task<List<ProjectReference>> GetRecentProjectsAsync()
     {
+
+        return Task.FromResult(new List<ProjectReference>());
         //SQLiteAsyncConnection connection = await EnsureInit();
         //recentProjects = await connection.Table<ProjectReference>().ToListAsync();
     }
 
-    public async Task SaveRecentProjectsAsync(IEnumerable<ProjectReference> recentProjects)
+    public Task SaveRecentProjectsAsync(IEnumerable<ProjectReference> recentProjects)
     {
+        return Task.CompletedTask;
         //SQLiteAsyncConnection connection = await EnsureInit();
         //var toInsert = recentProjects.OrderBy(p => p.LastOpened).Take(5);
         //await connection.Table<ProjectReference>().DeleteAsync();
