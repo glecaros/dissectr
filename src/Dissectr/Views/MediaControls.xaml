@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:views="clr-namespace:Dissectr.Views"
+             xmlns:viewModels="clr-namespace:Dissectr.ViewModels"
+             xmlns:converters="clr-namespace:Dissectr.Converters"
+             x:Class="Dissectr.Views.MediaControls"
+             x:Name="this"
+             BackgroundColor="LightGray">
+    <ContentView.Resources>
+        <converters:MediaElementStateToPlaying x:Key="mediaElementStateToPlaying"/>
+    </ContentView.Resources>
+    <Border
+        BindingContext="{x:Reference this}"
+        Stroke="{x:DynamicResource Primary}"
+        StrokeThickness="2">
+        <Grid Padding="10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="20" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="30" />
+            </Grid.RowDefinitions>
+            <Label
+                Grid.Row="0"
+                x:Name="positionLabel"
+                HorizontalOptions="Center"
+                TextColor="Black"
+                Text="{Binding Source={x:Reference slider}, Path=Position, StringFormat='{0:hh\\:mm\\:ss}'}" />
+            <views:PositionSlider
+                Grid.Row="1"
+                x:Name="slider"
+                Position="{Binding Position}"
+                Duration="{Binding Duration}"
+                VerticalOptions="CenterAndExpand"
+                DragStarted="dragStarted"
+                DragCompleted="dragCompleted"/>
+            <Label
+                Grid.Row="2"
+                HorizontalOptions="Center"
+                TextColor="Black">
+                <Label.FormattedText>
+                    <FormattedString>
+                        <Span Text="{Binding PlaybackState}" />
+                        <Span Text="[" />
+                        <Span Text="{Binding CurrentInterval.Start, StringFormat='{0:hh\\:mm\\:ss}'}" />
+                        <Span Text="&#xf061;" FontFamily="FontAwesomeFree" />
+                        <Span Text="{Binding CurrentInterval.End, StringFormat='{0:hh\\:mm\\:ss}'}" />
+                        <Span Text="]" />
+                    </FormattedString>
+                </Label.FormattedText>
+            </Label>
+            <HorizontalStackLayout
+                Grid.Row="3"
+                HorizontalOptions="Center" HeightRequest="100">
+                <Button
+                    x:Name="zoomButton"
+                    Clicked="zoomButtonClicked"
+                    FontFamily="FontAwesomeFree"
+                    VerticalOptions="Center"
+                    Text="&#xf002;"/>
+                <Button
+                    x:Name="loopButton"
+                    Clicked="loopButtonClicked"
+                    FontFamily="FontAwesomeFree"
+                    VerticalOptions="Center"
+                    Text="&#xf021;"/>
+                <Button
+                    x:Name="moveBackButton"
+                    Clicked="moveButtonClicked"
+                    FontFamily="FontAwesomeFree"
+                    VerticalOptions="Center"
+                    Text="&#xf048;"/>
+                <Button
+                    x:Name="togglePlayButton"
+                    Clicked="togglePlayClicked"
+                    Text="&#xf04b;"
+                    FontFamily="FontAwesomeFree"
+                    VerticalOptions="Center">
+                    <Button.Triggers>
+                        <DataTrigger
+                            TargetType="Button"
+                            Binding="{Binding PlaybackState, Converter={x:StaticResource mediaElementStateToPlaying}}"
+                            Value="True">
+                            <Setter Property="Text" Value="&#xf04c;"/>
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+                <Button
+                    x:Name="moveForwardButton"
+                    Clicked="moveButtonClicked"
+                    FontFamily="FontAwesomeFree"
+                    VerticalOptions="Center"
+                    Text="&#xf051;"/>
+            </HorizontalStackLayout>
+        </Grid>
+    </Border>
+
+</ContentView>

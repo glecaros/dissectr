@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:local="clr-namespace:Dissectr"
+             xmlns:views="clr-namespace:Dissectr.Views"
+             xmlns:viewModels="clr-namespace:Dissectr.ViewModels"
+             x:Class="Dissectr.Views.MainPage"
+             x:Name="view"
+             Unloaded="OnUnloaded"
+             BindingContextChanged="OnBindingContextChanged">
+    <ContentPage.BindingContext>
+        <viewModels:MainViewModel x:Name="mainViewModel" />
+    </ContentPage.BindingContext>
+    <ContentPage.MenuBarItems>
+        <MenuBarItem Text="File">
+            <MenuFlyoutItem Text="Open Project"></MenuFlyoutItem>
+            <MenuFlyoutItem Text="Save Project"></MenuFlyoutItem>
+            <MenuFlyoutItem Text="Save Project As"></MenuFlyoutItem>
+            <MenuFlyoutItem Text="Exit"></MenuFlyoutItem>
+        </MenuBarItem>
+    </ContentPage.MenuBarItems>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <toolkit:MediaElement
+            Grid.RowSpan="3"
+            x:Name="mediaElement"
+            ShouldShowPlaybackControls="False"
+            Source="{Binding MediaSource}"
+            CurrentState="{Binding PlaybackState, Mode=OneWayToSource}">
+            <toolkit:MediaElement.Behaviors>
+                <toolkit:EventToCommandBehavior
+                    Command="{Binding OpenedCommand}"
+                    CommandParameter="{Binding Source={x:Reference mediaElement}, Path=Duration}"
+                    EventName="MediaOpened" />
+            </toolkit:MediaElement.Behaviors>
+        </toolkit:MediaElement>
+        <views:MediaControls
+            Grid.Row="0"
+            Grid.Column="1"
+            IntervalLength="{Binding IntervalLength}"
+            Duration="{Binding Source={x:Reference mediaElement}, Path=Duration}"
+            Position="{Binding Source={x:Reference mediaElement}, Path=Position}"
+            PlaybackState="{Binding PlaybackState}"
+            Play="{Binding PlayCommand}"
+            Pause="{Binding PauseCommand}"
+            Seek="{Binding SeekCommand}"
+            IntervalChanging="{Binding IntervalChangingCommand}"/>
+        <Editor
+            Grid.Row="3"
+            Grid.Column="0"
+            Text="{Binding Transcription}"
+            Placeholder="Enter the transcription here">
+        </Editor>
+        <CollectionView
+            Grid.Row="1"
+            Grid.Column="1"
+            Grid.RowSpan="3"
+            ItemsSource="{Binding Dimensions}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="30" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button
+                            CornerRadius="0"
+                            BorderWidth="0"
+                            Padding="1"
+                            HeightRequest="30"
+                            MinimumHeightRequest="30"
+                            Text="{Binding Dimension.Name}"
+                            HorizontalOptions="Fill"
+                            VerticalOptions="Center" />
+                        <ListView
+                                Loaded="DimensionListLoaded"
+                                Grid.Row="1"
+                                HorizontalOptions="CenterAndExpand"
+                                SelectionMode="Single"
+                                ItemsSource="{Binding Dimension.DimensionOptions}"
+                                ItemSelected="DimensionOptionSelected">>
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <ViewCell>
+                                        <Grid >
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="30" />
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="30" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Label
+                                                Grid.Column="0"
+                                                Text="&#xf00c;"
+                                                FontFamily="FontAwesomeFree"
+                                                VerticalOptions="Center"
+                                                Margin="10,0,0,0"
+                                                IsVisible="{Binding IsSelected}">
+                                            </Label>
+                                            <Label
+                                                Grid.Row="0"
+                                                Grid.Column="1"
+                                                VerticalOptions="Center"
+                                                Text="{Binding Name}" />
+                                        </Grid>
+                                    </ViewCell>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+</ContentPage>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="Dissectr.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:Dissectr"
+    xmlns:views="clr-namespace:Dissectr.Views"
+    Shell.FlyoutBehavior="Disabled">
+
+    <ShellContent
+        Title="Dissectr"
+        ContentTemplate="{DataTemplate views:StartPage}"
+        Route="start" />
+
+    <ShellContent
+        Title="Dissectr"
+        ContentTemplate="{DataTemplate views:NewProjectPage}"
+        Route="new-project" />
+
+    <ShellContent
+        Title="Dissectr"
+        ContentTemplate="{DataTemplate views:MainPage}"
+        Route="main" />
+
+</Shell>

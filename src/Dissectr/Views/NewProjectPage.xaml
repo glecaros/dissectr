@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:viewModels="clr-namespace:Dissectr.ViewModels"
+             x:Class="Dissectr.Views.NewProjectPage"
+             Title="NewProject">
+    <ContentPage.BindingContext>
+        <viewModels:NewProjectViewModel x:Name="newProjectViewModel" />
+    </ContentPage.BindingContext>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="45" />
+            <RowDefinition Height="45" />
+            <RowDefinition Height="45" />
+            <RowDefinition Height="45" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="45" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="3*" />
+        </Grid.ColumnDefinitions>
+        <Label
+            Grid.Row="0"
+            Grid.Column="0"
+            Text="Name"
+            VerticalOptions="Center"
+            HorizontalOptions="End" />
+        <Entry
+            Grid.Row="0"
+            Grid.Column="1"
+            Margin="10,0,0,0"
+            Placeholder="Project Name"
+            VerticalOptions="Center"
+            Text="{Binding Name}" />
+        <Label
+            Grid.Row="1"
+            Grid.Column="0"
+            Text="Interval Length:"
+            VerticalOptions="Center"
+            HorizontalOptions="End"/>
+        <HorizontalStackLayout
+            Grid.Row="1"
+            Grid.Column="1"
+            Margin="10,0,0,0"
+            Spacing="10">
+            <Label
+                VerticalOptions="Center"
+                Text="{Binding Path=IntervalLength, StringFormat='{0:hh\\:mm\\:ss}'}" />
+            <Stepper
+                Minimum="5"
+                Maximum="60"
+                Value="10"
+                Increment="5">
+                <Stepper.Behaviors>
+                    <toolkit:EventToCommandBehavior
+                        x:TypeArguments="ValueChangedEventArgs"
+                        EventName="ValueChanged"
+                        Command="{Binding IntervalLengthChangedCommand}" />
+                </Stepper.Behaviors>
+            </Stepper>
+        </HorizontalStackLayout>
+        <Label
+            Grid.Row="2"
+            Grid.Column="0"
+            Text="File"
+            VerticalOptions="Center"
+            HorizontalOptions="End" />
+        <Grid
+            Grid.Row="2"
+            Grid.Column="1"
+            Margin="10,0,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="80" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Button
+                Grid.Row="0"
+                Grid.Column="0"
+                Text="Browse"
+                VerticalOptions="Center"
+                Command="{Binding BrowseCommand}" />
+            <Entry
+                Grid.Row="0"
+                Grid.Column="1"
+                Placeholder="Select a file..."
+                Margin="10,0,0,0"
+                VerticalOptions="Center"
+                IsEnabled="False"
+                Text="{Binding FilePath}" />
+        </Grid>
+        <Label
+            Grid.Row="3"
+            Grid.Column="0"
+            Text="Dimensions"
+            VerticalOptions="Center"
+            HorizontalOptions="End" />
+        <HorizontalStackLayout
+            Grid.Row="3"
+            Grid.Column="1"
+            HorizontalOptions="Start" >
+            <Button
+                Text="Add Dimension"
+                Margin="10,0,0,0"
+                VerticalOptions="Center"
+                Command="{Binding AddDimensionCommand}" />
+            <Button
+                Grid.Row="3"
+                Grid.Column="1"
+                Text="Import"
+                Margin="10,0,0,0"
+                VerticalOptions="Center"
+                HorizontalOptions="Start"
+                Command="{Binding ImportDimensionsCommand}" />
+        </HorizontalStackLayout>
+        <CollectionView
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Grid.Row="4"
+            ItemsSource="{Binding Dimensions}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border
+                        StrokeThickness="2"
+                        Margin="0"
+                        Padding="5"
+                        Stroke="{x:DynamicResource Primary}" >
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="45" />
+                                <RowDefinition Height="45" />
+                                <RowDefinition Height="45" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="6*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label
+                                Grid.Column="0"
+                                Grid.Row="0"
+                                HorizontalOptions="End"
+                                VerticalOptions="Center"
+                                Text="Name" />
+                            <Entry
+                                Grid.Column="1"
+                                Grid.Row="0"
+                                Margin="10,0,0,0"
+                                Text="{Binding Name}" />
+                            <Button
+                                Grid.Column="2"
+                                Grid.Row="0"
+                                Text="&#xf1f8;"
+                                FontFamily="FontAwesomeFree"
+                                Command="{Binding RemoveDimensionCommand, Source={x:Reference newProjectViewModel}}"
+                                CommandParameter="{Binding}"/>
+                            <Label
+                                Grid.Column="0"
+                                Grid.Row="1"
+                                HorizontalOptions="End"
+                                VerticalOptions="Center"
+                                Text="Optional" />
+                            <CheckBox
+                                Grid.Column="1"
+                                Grid.Row="1"
+                                Margin="10,0,0,0"
+                                IsChecked="{Binding Optional}" />
+                            <Label
+                                Grid.Column="0"
+                                Grid.Row="2"
+                                HorizontalOptions="End"
+                                VerticalOptions="Center"
+                                Text="Values" />
+                            <Button
+                                Grid.Column="1"
+                                Grid.Row="2"
+                                Text="Add Value"
+                                Margin="10,0,0,0"
+                                VerticalOptions="Center"
+                                HorizontalOptions="Start"
+                                Command="{Binding AddDimensionOptionCommand, Source={x:Reference newProjectViewModel}}"
+                                CommandParameter="{Binding}"/>
+                            <CollectionView
+                                Grid.Column="1"
+                                Grid.Row="3"
+                                Grid.ColumnSpan="1"
+                                ItemsSource="{Binding DimensionOptions}">
+                                <CollectionView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="2*" />
+                                                <ColumnDefinition Width="8*" />
+                                                <ColumnDefinition Width="*" />
+                                            </Grid.ColumnDefinitions>
+                                            <Entry
+                                                Grid.Column="0"
+                                                Grid.Row="0"
+                                                Margin="10,0,0,0"
+                                                Text="{Binding Code}" />
+                                            <Entry
+                                                Grid.Column="1"
+                                                Grid.Row="0"
+                                                Margin="10,0,0,0"
+                                                Text="{Binding Name}" />
+                                            <Button
+                                                Grid.Column="2"
+                                                Grid.Row="0"
+                                                Text="&#xf00d;"
+                                                FontFamily="FontAwesomeFree"
+                                                Command="{Binding RemoveDimensionOptionCommand, Source={x:Reference newProjectViewModel}}"
+                                                CommandParameter="{Binding}"/>
+                                        </Grid>
+                                    </DataTemplate>
+                                </CollectionView.ItemTemplate>
+                            </CollectionView>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+        <AbsoluteLayout
+            Grid.Row="5"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Padding="0,0,0,0"
+            BackgroundColor="{x:DynamicResource Primary}">
+            <Button
+                AbsoluteLayout.LayoutBounds="0,0.5,100,43"
+                AbsoluteLayout.LayoutFlags="PositionProportional"
+                Text="Cancel"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                Command="{Binding CancelCommand}" />
+            <Button
+                AbsoluteLayout.LayoutBounds="1,0.5,100,43"
+                AbsoluteLayout.LayoutFlags="PositionProportional"
+                Text="Save"
+                HorizontalOptions="Center"
+                VerticalOptions="Center"
+                IsEnabled="{Binding IsValid}"
+                Command="{Binding SaveCommand}" />
+        </AbsoluteLayout>
+    </Grid>
+
+</ContentPage>

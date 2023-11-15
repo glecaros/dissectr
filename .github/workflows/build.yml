@@ -1,0 +1,43 @@
+name: Build and Publish .NET MAUI App
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+        dotnet-version: [8.x]
+        include:
+          - os: macos-latest
+            target-framework: net8.0-maccatalyst
+          - os: windows-latest
+            target-framework: net8.0-windows10.0.19041.0
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: ${{ matrix.dotnet-version }}
+
+      - name: Install .NET MAUI Workload
+        run: dotnet workload install maui
+
+      - name: Restore NuGet packages
+        run: dotnet restore
+
+      - name: Build and Publish
+        run: dotnet publish -c Release -f ${{ matrix.target-framework }} /p:PublishSingleFile=true /p:PublishTrimmed=true /p:IncludeNativeLibrariesForSelfExtract=true /p:PublishReadyToRun=true /p:PublishReadyToRunShowWarnings=true /p:PublishReadyToRunUseCrossgen2=true /p:UseAppHost=true /p:SelfContained=true /p:PublishDir=./artifacts
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.os }}-app
+          path: ./artifacts
