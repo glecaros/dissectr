@@ -15,9 +15,10 @@ jobs:
         include:
           - os: macos-latest
             target-framework: net8.0-maccatalyst
+            runtime-identifier: [osx-x64, osx-arm64]
           - os: windows-latest
             target-framework: net8.0-windows10.0.19041.0
-
+            runtime-identifier: [win-x64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -34,10 +35,10 @@ jobs:
         run: dotnet restore
 
       - name: Build and Publish
-        run: dotnet publish -c Release -f ${{ matrix.target-framework }} /p:PublishDir=./artifacts
+        run: dotnet publish -c Release -r ${{ matrix.runtime-identifier }} -f ${{ matrix.target-framework }} /p:PublishDir=./artifacts
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.os }}-app
+          name: ${{ matrix.runtime-identifier }}-app
           path: ./artifacts
