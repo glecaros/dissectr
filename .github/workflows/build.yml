@@ -12,7 +12,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        runtime-identifier: [win-x64, win-arm64, maccatalyst-x64, maccatalyst-arm64]
+        runtime-identifier: [win-x64, maccatalyst-x64, maccatalyst-arm64]
         dotnet-version: [8.x]
         include:
           - runtime-identifier: win-x64
