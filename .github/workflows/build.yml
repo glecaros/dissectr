@@ -39,7 +39,12 @@ jobs:
       - name: Restore NuGet packages
         run: dotnet restore
 
-      - name: Build and Publish
+      - name: Build and Publish (Windows)
+        if: ${{ matrix.os == windows-latest }}
+        run: dotnet publish -c Release -f ${{ matrix.target-framework }} /p:PublishDir=./artifacts
+
+      - name: Build and Publish (Mac)
+        if: ${{ matrix.os == macos-latest }}
         run: dotnet publish -c Release -r ${{ matrix.runtime-identifier }} -f ${{ matrix.target-framework }} /p:PublishDir=./artifacts
 
       - name: Upload Artifacts
