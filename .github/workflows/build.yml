@@ -26,10 +26,10 @@ jobs:
             target-framework: net8.0-maccatalyst
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
 
@@ -41,14 +41,14 @@ jobs:
 
       - name: Build and Publish (Windows)
         if: ${{ matrix.os == windows-latest }}
-        run: dotnet publish -c Release -f ${{ matrix.target-framework }} /p:PublishDir=./artifacts
+        run: dotnet publish -c Release -f ${{ matrix.target-framework }} -o "${{ github.workspace }}/artifacts"
 
       - name: Build and Publish (Mac)
         if: ${{ matrix.os == macos-latest }}
-        run: dotnet publish -c Release -r ${{ matrix.runtime-identifier }} -f ${{ matrix.target-framework }} /p:PublishDir=./artifacts
+        run: dotnet publish -c Release -r ${{ matrix.runtime-identifier }} -f ${{ matrix.target-framework }} -o "${{ github.workspace }}/artifacts"
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.runtime-identifier }}-app
           path: ./artifacts
