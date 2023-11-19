@@ -21,9 +21,11 @@ jobs:
           - runtime-identifier: maccatalyst-x64
             os: macos-latest
             target-framework: net8.0-maccatalyst
+            extra-params: -r maccatalyst-x64
           - runtime-identifier: maccatalyst-arm64
             os: macos-latest
             target-framework: net8.0-maccatalyst
+            extra-params: -r maccatalyst-arm64
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -39,13 +41,8 @@ jobs:
       - name: Restore NuGet packages
         run: dotnet restore
 
-      - name: Build and Publish (Windows)
-        if: ${{ matrix.os == windows-latest }}
-        run: dotnet publish -c Release -f ${{ matrix.target-framework }} -o "${{ github.workspace }}/artifacts"
-
-      - name: Build and Publish (Mac)
-        if: ${{ matrix.os == macos-latest }}
-        run: dotnet publish -c Release -r ${{ matrix.runtime-identifier }} -f ${{ matrix.target-framework }} -o "${{ github.workspace }}/artifacts"
+      - name: Build and Publish
+        run: dotnet publish -c Release ${{ matrix.extra-params }} -f ${{ matrix.target-framework }} -o "${{ github.workspace }}/artifacts"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
