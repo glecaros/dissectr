@@ -18,6 +18,7 @@ jobs:
           - runtime-identifier: win-x64
             os: windows-latest
             target-framework: net8.0-windows10.0.19041.0
+            extra-params: -p:RuntimeIdentifierOverride=win10-x64 -p:WindowsPackageType=None -p:WindowsAppSDKSelfContained=true
           - runtime-identifier: maccatalyst-x64
             os: macos-latest
             target-framework: net8.0-maccatalyst
