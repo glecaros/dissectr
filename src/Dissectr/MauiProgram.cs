@@ -1,5 +1,9 @@
 using CommunityToolkit.Maui;
+using Dissectr.Services;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Controls.Hosting;
+using Microsoft.Maui.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Dissectr;
 
@@ -18,6 +22,7 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 fonts.AddFont("Font Awesome 6 Free-Solid-900.otf", "FontAwesomeFree");
             });
+        builder.Services.AddSingleton<IAlertService, AlertService>();
 
 #if DEBUG
         builder.Logging.AddDebug();

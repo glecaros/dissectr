@@ -1,3 +1,6 @@
+using System;
+using Microsoft.Maui.Controls;
+
 namespace Dissectr.Views;
 
 public class PositionSlider : Slider

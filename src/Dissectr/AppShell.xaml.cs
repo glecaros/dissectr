@@ -1,4 +1,5 @@
 using Dissectr.Views;
+using Microsoft.Maui.Controls;
 
 namespace Dissectr;
 

@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using CommunityToolkit.Maui.Core.Primitives;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -20,9 +22,6 @@ public partial class MainViewModel: ObservableObject, IMediaControl
     [ObservableProperty]
     private TimeSpan intervalLength = TimeSpan.Zero;
 
-    public MainViewModel()
-    {
-    }
 
     #region IMediaControl
     public event Action? Play;

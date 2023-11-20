@@ -1,8 +1,10 @@
+using System;
 using System.ComponentModel;
 
 using CommunityToolkit.Maui.Views;
 using Dissectr.Models;
 using Dissectr.Util;
+using Microsoft.Maui.Controls;
 
 namespace Dissectr.Views;
 

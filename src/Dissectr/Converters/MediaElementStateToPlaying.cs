@@ -1,4 +1,6 @@
 ﻿using CommunityToolkit.Maui.Core.Primitives;
+using Microsoft.Maui.Controls;
+using System;
 using System.Globalization;
 
 namespace Dissectr.Converters;

@@ -1,5 +1,8 @@
 ﻿//using SQLite;
 
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
 namespace Dissectr.Models;
 
 public class AppData

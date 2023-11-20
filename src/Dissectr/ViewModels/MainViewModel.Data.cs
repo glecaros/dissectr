@@ -1,8 +1,19 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Storage;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Dissectr.Models;
+using Dissectr.Util;
 using Dissectr.Views;
+using Microsoft.Maui.Devices;
+using Microsoft.Maui.Storage;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Dissectr.ViewModels;
 
@@ -63,6 +74,30 @@ public partial class MainViewModel
         if (dimension is not null)
         {
             dimension.IsVisible = !dimension.IsVisible;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ExportToXLS(CancellationToken cancellationToken = default)
+    {
+        if (_project is null)
+        {
+            throw new ApplicationException("Unexpected error, project is null");
+        }
+        var memoryStream = new MemoryStream();
+        var entries = await _project.GetEntries();
+        Exporter.ExportToXLS(_project, entries, memoryStream);
+        var result = await FileSaver.SaveAsync(
+            Path.GetDirectoryName(_project.ProjectFile),
+            $"{_project.Name}.xlsx",
+            memoryStream, cancellationToken);
+        if (result.IsSuccessful)
+        {
+            await _alertService.ShowAlertAsync("Notice", "Success!");
+        }
+        else
+        {
+            await _alertService.ShowAlertAsync("Alert", "Issue saving file");
         }
     }
 }

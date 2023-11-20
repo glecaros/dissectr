@@ -12,24 +12,26 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [macos-latest, windows-latest]
+        runtime-identifier: [win-x64, maccatalyst-x64, maccatalyst-arm64]
         dotnet-version: [8.x]
         include:
-          - os: macos-latest
-            target-framework: net8.0-maccatalyst
-            runtime-identifier: osx-x64
-          - os: macos-latest
-            target-framework: net8.0-maccatalyst
-            runtime-identifier: osx-arm64
-          - os: windows-latest
+          - runtime-identifier: win-x64
+            os: windows-latest
             target-framework: net8.0-windows10.0.19041.0
-            runtime-identifier: [win-x64]
+          - runtime-identifier: maccatalyst-x64
+            os: macos-latest
+            target-framework: net8.0-maccatalyst
+            extra-params: -r maccatalyst-x64
+          - runtime-identifier: maccatalyst-arm64
+            os: macos-latest
+            target-framework: net8.0-maccatalyst
+            extra-params: -r maccatalyst-arm64
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v3
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
 
@@ -40,10 +42,10 @@ jobs:
         run: dotnet restore
 
       - name: Build and Publish
-        run: dotnet publish -c Release -r ${{ matrix.runtime-identifier }} -f ${{ matrix.target-framework }} /p:PublishDir=./artifacts
+        run: dotnet publish -c Release ${{ matrix.extra-params }} -f ${{ matrix.target-framework }} -o "${{ github.workspace }}/artifacts"
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ${{ matrix.runtime-identifier }}-app
           path: ./artifacts

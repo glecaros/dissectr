@@ -1,4 +1,6 @@
-﻿namespace Dissectr.Models;
+﻿using System;
+
+namespace Dissectr.Models;
 
 public class ProjectReference
 {

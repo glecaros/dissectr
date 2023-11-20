@@ -1,4 +1,6 @@
-﻿namespace Dissectr.Util;
+﻿using System;
+
+namespace Dissectr.Util;
 
 public interface IMediaControl
 {
