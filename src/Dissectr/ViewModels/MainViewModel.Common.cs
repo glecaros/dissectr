@@ -5,6 +5,7 @@ using CommunityToolkit.Maui.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Dissectr.Models;
+using Dissectr.Services;
 using Microsoft.Maui.Controls;
 
 namespace Dissectr.ViewModels;
@@ -12,6 +13,13 @@ namespace Dissectr.ViewModels;
 [QueryProperty(nameof(ProjectPath), "path")]
 public partial class MainViewModel
 {
+    private readonly IAlertService _alertService;
+
+    public MainViewModel()
+    {
+        _alertService = new AlertService();
+    }
+
     [ObservableProperty]
     MediaSource? mediaSource;
 

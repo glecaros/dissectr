@@ -20,7 +20,7 @@
             <MenuFlyoutItem Text="Exit"></MenuFlyoutItem>
         </MenuBarItem>
         <MenuBarItem Text="Data">
-            <MenuFlyoutItem Text="Export to XLSX"></MenuFlyoutItem>
+            <MenuFlyoutItem Text="Export to XLSX" Command="{Binding ExportToXLSCommand}"></MenuFlyoutItem>
         </MenuBarItem>
     </ContentPage.MenuBarItems>
     <Grid>

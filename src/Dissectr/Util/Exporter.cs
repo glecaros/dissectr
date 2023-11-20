@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Dissectr.Models;
 using DocumentFormat.OpenXml;
@@ -24,21 +25,30 @@ public class Exporter
     private static Row GenerateHeader(Project project, Dictionary<Guid, int> mapping)
     {
         Row row = new();
-        row.Append(new Cell(new CellValue("Start")));
-        row.Append(new Cell(new CellValue("Transcription")));
+        row.Append(CreateTextCell("Start"));
+        row.Append(CreateTextCell("Transcription"));
         foreach (var dimension in project.Dimensions.OrderBy(d => mapping[d.Id]))
         {
-            row.Append(new Cell(new CellValue($"{dimension.Name} (Code)")));
-            row.Append(new Cell(new CellValue(dimension.Name)));
+            row.Append(CreateTextCell($"{dimension.Name} (Code)"));
+            row.Append(CreateTextCell(dimension.Name));
         }
         return row;
+    }
+
+    private static Cell CreateTextCell(string text)
+    {
+        var cell = new Cell();
+        cell.DataType = CellValues.InlineString;
+        cell.InlineString = new InlineString(new Text(text));
+        return cell;
+
     }
 
     private static Row GenerateRow(IntervalEntry entry, Dictionary<Guid, int> mapping)
     {
         Row row = new();
-        row.Append(new Cell(new CellValue(entry.Start.ToString(@"hh\:mm\:ss"))));
-        row.Append(new Cell(new CellValue(entry.Transcription ?? string.Empty)));
+        row.Append(CreateTextCell(entry.Start.ToString(@"hh\:mm\:ss")));
+        row.Append(CreateTextCell(entry.Transcription ?? string.Empty));
         foreach (var dimension in entry.Dimensions.OrderBy(d => mapping[d.Dimension.Id]))
         {
             var selection = dimension.Selection;
@@ -50,7 +60,7 @@ public class Exporter
             else
             {
                 row.Append(new Cell(new CellValue(selection.Code)));
-                row.Append(new Cell(new CellValue(selection.Name)));
+                row.Append(CreateTextCell(selection.Name));
             }
         }
         return row;
@@ -70,19 +80,26 @@ public class Exporter
         return new Worksheet(sheetData);
     }
 
-    public static void ExportToXLS(Project project, IEnumerable<IntervalEntry> entries, string path)
+    public static void ExportToXLS(Project project, IEnumerable<IntervalEntry> entries, Stream stream)
     {
-        using var spreadsheetDocument = SpreadsheetDocument.Create(path, SpreadsheetDocumentType.Workbook);
-        var workbook = spreadsheetDocument.AddWorkbookPart();
-        workbook.Workbook = new Workbook();
+        using var spreadsheetDocument = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook);
+        var workbookPart = spreadsheetDocument.AddWorkbookPart();
+        workbookPart.Workbook = new Workbook();
 
-        var sheets = workbook.Workbook.AppendChild(new Sheets());
-
-        var dataWorksheetPart = workbook.AddNewPart<WorksheetPart>();
+        var dataWorksheetPart = workbookPart.AddNewPart<WorksheetPart>();
         dataWorksheetPart.Worksheet = GenerateDataSheet(project, entries);
 
-        var dataSheet = new Sheet() { Id = workbook.GetIdOfPart(dataWorksheetPart), SheetId = 1, Name = "Data" };
+        var sheets = workbookPart.Workbook.AppendChild(new Sheets());
+
+        var dataSheet = new Sheet()
+        {
+            Id = workbookPart.GetIdOfPart(dataWorksheetPart),
+            SheetId = 1,
+            Name = "Data",
+        };
         sheets.Append(dataSheet);
+
+        workbookPart.Workbook.Save();
     }
 }
 

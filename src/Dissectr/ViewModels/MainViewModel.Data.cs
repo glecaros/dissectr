@@ -1,6 +1,9 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Maui.Alerts;
+using CommunityToolkit.Maui.Storage;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Dissectr.Models;
+using Dissectr.Util;
 using Dissectr.Views;
 using Microsoft.Maui.Devices;
 using Microsoft.Maui.Storage;
@@ -9,6 +12,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Dissectr.ViewModels;
@@ -74,23 +78,26 @@ public partial class MainViewModel
     }
 
     [RelayCommand]
-    private async Task ExportToXLS()
+    private async Task ExportToXLS(CancellationToken cancellationToken = default)
     {
-        var result = await FilePicker.Default.PickAsync(new()
+        if (_project is null)
         {
-            FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
-            {
-                { DevicePlatform.WinUI, new[] { ".xlsx" } },
-                { DevicePlatform.macOS, new[] { "xlsx" } },
-            }),
-        });
-        if (result is null)
-        {
-            return;
+            throw new ApplicationException("Unexpected error, project is null");
         }
-        if (Path.Exists(result.FileName))
+        var memoryStream = new MemoryStream();
+        var entries = await _project.GetEntries();
+        Exporter.ExportToXLS(_project, entries, memoryStream);
+        var result = await FileSaver.SaveAsync(
+            Path.GetDirectoryName(_project.ProjectFile),
+            $"{_project.Name}.xlsx",
+            memoryStream, cancellationToken);
+        if (result.IsSuccessful)
         {
-            bool answer = await DisplayAlert("Confirmation", "That file already exists, do you want to overwrite it?", "Yes", "No");
+            await _alertService.ShowAlertAsync("Notice", "Success!");
+        }
+        else
+        {
+            await _alertService.ShowAlertAsync("Alert", "Issue saving file");
         }
     }
 }

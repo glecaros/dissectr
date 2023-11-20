@@ -22,9 +22,6 @@ public partial class MainViewModel: ObservableObject, IMediaControl
     [ObservableProperty]
     private TimeSpan intervalLength = TimeSpan.Zero;
 
-    public MainViewModel()
-    {
-    }
 
     #region IMediaControl
     public event Action? Play;

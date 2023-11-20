@@ -341,6 +341,35 @@ public class Project
         }
     }
 
+    public async Task<IEnumerable<IntervalEntry>> GetEntries()
+    {
+        var connectionString = new SqliteConnectionStringBuilder()
+        {
+            DataSource = ProjectFile,
+            Mode = SqliteOpenMode.ReadWriteCreate,
+        }.ToString();
+        using var connection = new SqliteConnection(connectionString);
+        await connection.OpenAsync();
+
+        var command = connection.CreateCommand();
+        command.CommandText = @"SELECT start, transcription FROM IntervalEntries;";
+        var reader = await command.ExecuteReaderAsync();
+        List<IntervalEntry> entries = new();
+        while (await reader.ReadAsync())
+        {
+            var start = reader.GetTimeSpan(0);
+            var transcription = GetString(reader, 1);
+            var selections = await GetSelections(connection, start);
+            entries.Add(new()
+            {
+                Start = start,
+                Transcription = transcription ?? string.Empty,
+                Dimensions = new(selections),
+            });
+        }
+        return entries;
+    }
+
     public async Task SaveEntry(IntervalEntry entry)
     {
         var connectionString = new SqliteConnectionStringBuilder()
