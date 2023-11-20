@@ -2,8 +2,12 @@
 using CommunityToolkit.Mvvm.Input;
 using Dissectr.Models;
 using Dissectr.Views;
+using Microsoft.Maui.Devices;
+using Microsoft.Maui.Storage;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -66,6 +70,27 @@ public partial class MainViewModel
         if (dimension is not null)
         {
             dimension.IsVisible = !dimension.IsVisible;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ExportToXLS()
+    {
+        var result = await FilePicker.Default.PickAsync(new()
+        {
+            FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+            {
+                { DevicePlatform.WinUI, new[] { ".xlsx" } },
+                { DevicePlatform.macOS, new[] { "xlsx" } },
+            }),
+        });
+        if (result is null)
+        {
+            return;
+        }
+        if (Path.Exists(result.FileName))
+        {
+            bool answer = await DisplayAlert("Confirmation", "That file already exists, do you want to overwrite it?", "Yes", "No");
         }
     }
 }

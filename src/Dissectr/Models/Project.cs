@@ -38,7 +38,7 @@ public class Project
     {
         var command = connection.CreateCommand();
         command.CommandText = @"
-            CREATE TABLE IF NOT EXISTS projects (
+            CREATE TABLE IF NOT EXISTS Projects (
                 id INT PRIMARY KEY NOT NULL,
                 name TEXT,
                 videoFile TEXT,
@@ -51,7 +51,7 @@ public class Project
     {
         var command = connection.CreateCommand();
         command.CommandText = @"
-            CREATE TABLE IF NOT EXISTS dimensions (
+            CREATE TABLE IF NOT EXISTS Dimensions (
                 id TEXT PRIMARY KEY NOT NULL,
                 `order` INTEGER NOT NULL,
                 name TEXT,
@@ -64,12 +64,12 @@ public class Project
     {
         var command = connection.CreateCommand();
         command.CommandText = @"
-            CREATE TABLE IF NOT EXISTS dimensionOptions (
+            CREATE TABLE IF NOT EXISTS DimensionOptions (
                 id TEXT PRIMARY KEY NOT NULL,
                 dimensionId TEXT,
                 code INTEGER,
                 name TEXT,
-                FOREIGN KEY(dimensionId) REFERENCES dimensions(id)
+                FOREIGN KEY(dimensionId) REFERENCES Dimensions(id)
             );";
         await command.ExecuteNonQueryAsync();
     }
@@ -94,8 +94,8 @@ public class Project
                 dimensionId TEXT NOT NULL,
                 optionId TEXT NOT NULL,
                 FOREIGN KEY (start) REFERENCES IntervalEntries(start),
-                FOREIGN KEY (dimensionId) REFERENCES dimensions(id),
-                FOREIGN KEY (optionId) REFERENCES dimensionOptions(id),
+                FOREIGN KEY (dimensionId) REFERENCES Dimensions(id),
+                FOREIGN KEY (optionId) REFERENCES DimensionOptions(id),
                 PRIMARY KEY (start, dimensionId)
             );";
         await command.ExecuteNonQueryAsync();
@@ -117,7 +117,7 @@ public class Project
     {
         var command = connection.CreateCommand();
         command.CommandText = @"
-            INSERT INTO dimensions (id, `order`, name, optional)
+            INSERT INTO Dimensions (id, `order`, name, optional)
             VALUES ($id, $order, $name, $optional);";
         var idParam = AddParameter(command, "$id");
         var orderParam = AddParameter(command, "$order");
@@ -139,7 +139,7 @@ public class Project
     {
         var command = connection.CreateCommand();
         command.CommandText = @"
-            INSERT INTO dimensionOptions (id, dimensionId, code, name)
+            INSERT INTO DimensionOptions (id, dimensionId, code, name)
             VALUES ($id, $dimensionId, $code, $name);";
         var idParam = AddParameter(command, "$id");
         AddParameter(command, "$dimensionId", dimensionId);
@@ -166,7 +166,7 @@ public class Project
 
         var command = connection.CreateCommand();
         command.CommandText = @"
-            INSERT INTO projects (id, name, videoFile, interval)
+            INSERT INTO Projects (id, name, videoFile, interval)
             VALUES ($id, $name, $videoFile, $interval)
         ";
         AddParameter(command, "$id", 1);
@@ -185,7 +185,7 @@ public class Project
     private static async Task<List<DimensionOption>> LoadOptions(SqliteConnection connection, Guid dimensionId)
     {
         var command = connection.CreateCommand();
-        command.CommandText = "SELECT id, code, name FROM dimensionOptions WHERE dimensionId = $dimensionId;";
+        command.CommandText = "SELECT id, code, name FROM DimensionOptions WHERE dimensionId = $dimensionId;";
         AddParameter(command, "$dimensionId", dimensionId);
         using var reader = await command.ExecuteReaderAsync();
         List<DimensionOption> options = new();
@@ -202,7 +202,7 @@ public class Project
     private static async Task<List<Dimension>> LoadDimensions(SqliteConnection connection)
     {
         var command = connection.CreateCommand();
-        command.CommandText = @"SELECT id, `order`, name, optional FROM dimensions;";
+        command.CommandText = @"SELECT id, `order`, name, optional FROM Dimensions;";
 
         using var reader = await command.ExecuteReaderAsync();
         List<Dimension> dimensions = new();
@@ -235,7 +235,7 @@ public class Project
         using var connection = new SqliteConnection(connectionString);
         await connection.OpenAsync();
         var command = connection.CreateCommand();
-        command.CommandText = "SELECT name, videoFile, interval FROM projects LIMIT 1";
+        command.CommandText = "SELECT name, videoFile, interval FROM Projects LIMIT 1";
         using var reader = await command.ExecuteReaderAsync();
         if (await reader.ReadAsync())
         {
