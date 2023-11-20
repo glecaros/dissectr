@@ -9,7 +9,6 @@
         <RootNamespace>Dissectr</RootNamespace>
         <UseMaui>true</UseMaui>
         <SingleProject>true</SingleProject>
-        <ImplicitUsings>enable</ImplicitUsings>
         <SelfContained>true</SelfContained>
 
         <!-- Display name -->

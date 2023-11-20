@@ -1,4 +1,6 @@
 using CommunityToolkit.Maui.Core.Primitives;
+using Microsoft.Maui.Controls;
+using System;
 using System.Reflection.Metadata;
 using System.Windows.Input;
 

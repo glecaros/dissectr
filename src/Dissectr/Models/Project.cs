@@ -1,8 +1,12 @@
-﻿using Microsoft.Data.Sqlite;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Data.Sqlite;
 
 namespace Dissectr.Models;
 
-class Project
+public class Project
 {
     public string Name { get; set; }
     public string ProjectFile { get; set; }
