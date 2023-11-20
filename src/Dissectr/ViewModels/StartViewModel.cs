@@ -52,16 +52,8 @@ public partial class StartViewModel: ObservableObject
             { DevicePlatform.macOS, new[] { "dissectr" } },
         };
         var result = await picker.PickFileAsync("Select a video", fileTypes);
-        var filePath = result switch
-        {
-            null => string.Empty,
-            IPickFile pickFile => pickFile.FileResult switch
-            {
-                null => string.Empty,
-                FileResult fileResult => fileResult.FullPath,
-            },
-        };
-        if (result is null)
+        string? filePath = result?.FileResult?.FullPath;
+        if (filePath is null)
         {
             return;
         }
