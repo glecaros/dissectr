@@ -55,8 +55,8 @@ public partial class NewProjectViewModel: ObservableValidator
         var picker = FilePickerService.Instance;
         var fileTypes = new Dictionary<DevicePlatform, IEnumerable<string>>
         {
-            { DevicePlatform.WinUI, FilePickerFileType.Videos.Value },
-            { DevicePlatform.macOS, FilePickerFileType.Videos.Value },
+            { DevicePlatform.WinUI, new [] { ".mp4",".mpg", ".mpeg", ".mov", ".avi" } },
+            { DevicePlatform.macOS, new [] { "mp4", "mpg", "mpeg", "mov", "avi" } },
         };
         var result = await picker.PickFileAsync("Select a video", fileTypes);
         FilePath = result switch
