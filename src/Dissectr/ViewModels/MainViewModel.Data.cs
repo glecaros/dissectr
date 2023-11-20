@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Input;
 using Dissectr.Models;
 using Dissectr.Util;
 using Dissectr.Views;
+using LukeMauiFilePicker;
 using Microsoft.Maui.Devices;
 using Microsoft.Maui.Storage;
 using System;
@@ -87,11 +88,13 @@ public partial class MainViewModel
         var memoryStream = new MemoryStream();
         var entries = await _project.GetEntries();
         Exporter.ExportToXLS(_project, entries, memoryStream);
-        var result = await FileSaver.SaveAsync(
-            Path.GetDirectoryName(_project.ProjectFile),
-            $"{_project.Name}.xlsx",
-            memoryStream, cancellationToken);
-        if (result.IsSuccessful)
+
+        var picker = FilePickerService.Instance;
+        var success = await picker.SaveFileAsync(new($"{_project.Name}.xlsx", memoryStream)
+        {
+            WindowsFileTypes = ("XLSX File", new() { ".xlsx" }),
+        });
+        if (success)
         {
             await _alertService.ShowAlertAsync("Notice", "Success!");
         }

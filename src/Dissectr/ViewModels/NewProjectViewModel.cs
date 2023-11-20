@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Dissectr.Models;
+using LukeMauiFilePicker;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Devices;
 using Microsoft.Maui.Storage;
@@ -51,15 +52,21 @@ public partial class NewProjectViewModel: ObservableValidator
     [RelayCommand]
     private async Task Browse()
     {
-        var result = await FilePicker.Default.PickAsync(new()
+        var picker = FilePickerService.Instance;
+        var fileTypes = new Dictionary<DevicePlatform, IEnumerable<string>>
         {
-            FileTypes = FilePickerFileType.Videos,
-            PickerTitle = "Select a video",
-        });
+            { DevicePlatform.WinUI, FilePickerFileType.Videos.Value },
+            { DevicePlatform.macOS, FilePickerFileType.Videos.Value },
+        };
+        var result = await picker.PickFileAsync("Select a video", fileTypes);
         FilePath = result switch
         {
             null => string.Empty,
-            FileResult fileResult => fileResult.FullPath,
+            IPickFile pickFile => pickFile.FileResult switch
+            {
+                null => string.Empty,
+                FileResult fileResult => fileResult.FullPath,
+            },
         };
     }
 
@@ -81,19 +88,19 @@ public partial class NewProjectViewModel: ObservableValidator
     [RelayCommand]
     private async Task ImportDimensions()
     {
-        var result = await FilePicker.Default.PickAsync(new()
+        var picker = FilePickerService.Instance;
+        var fileTypes = new Dictionary<DevicePlatform, IEnumerable<string>>
         {
-            FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
-            {
-                { DevicePlatform.WinUI, new[] { ".dissectr" } },
-                { DevicePlatform.macOS, new[] { "dissectr" } },
-            }),
-        });
-        if (result is null)
+            { DevicePlatform.WinUI, new[] { ".dissectr" } },
+            { DevicePlatform.macOS, new[] { "dissectr" } },
+        };
+        var result = await picker.PickFileAsync("Select an existing project", fileTypes);
+        string? projectPath = result?.FileResult?.FullPath;
+        if (projectPath is null)
         {
             return;
         }
-        var imported = await Project.LoadAsync(result.FullPath);
+        var imported = await Project.LoadAsync(projectPath);
         foreach (var dimension in imported.Dimensions)
         {
             Dimensions.Add(dimension);
