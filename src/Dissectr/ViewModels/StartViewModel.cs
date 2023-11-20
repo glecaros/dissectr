@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Dissectr.Models;
+using LukeMauiFilePicker;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Devices;
 using Microsoft.Maui.Storage;
@@ -44,18 +45,26 @@ public partial class StartViewModel: ObservableObject
     [RelayCommand]
     private async Task OpenProject()
     {
-        var result = await FilePicker.Default.PickAsync(new()
+        var picker = FilePickerService.Instance;
+        var fileTypes =new Dictionary<DevicePlatform, IEnumerable<string>>
         {
-            FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+            { DevicePlatform.WinUI, new[] { ".dissectr" } },
+            { DevicePlatform.macOS, new[] { "dissectr" } },
+        };
+        var result = await picker.PickFileAsync("Select a video", fileTypes);
+        var filePath = result switch
+        {
+            null => string.Empty,
+            IPickFile pickFile => pickFile.FileResult switch
             {
-                { DevicePlatform.WinUI, new[] { ".dissectr" } },
-                { DevicePlatform.macOS, new[] { "dissectr" } },
-            }),
-        });
+                null => string.Empty,
+                FileResult fileResult => fileResult.FullPath,
+            },
+        };
         if (result is null)
         {
             return;
         }
-        await Shell.Current.GoToAsync($"//main?path={result.FullPath}");
+        await Shell.Current.GoToAsync($"//main?path={filePath}");
     }
 }
